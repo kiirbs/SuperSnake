@@ -1,7 +1,7 @@
 # SuperSnake
 
-First python project
-Just a snake remake
+First python project,
+a remasterised snake.
 
 ## MVP
 
