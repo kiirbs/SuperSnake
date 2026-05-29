@@ -5,7 +5,8 @@ Just a snake remake
 
 ## MVP
 
-- [ ] Fenêtre
+- [X] Fenêtre
+- [X] Grille
 - [ ] Serpent
 - [ ] Déplacement
 - [ ] Nourriture
