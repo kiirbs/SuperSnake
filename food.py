@@ -1,4 +1,8 @@
+import pygame
 import random
+
+import settings
+from collections import deque
 
 def generate_food(grid_size, snake):
     
@@ -10,3 +14,19 @@ def generate_food(grid_size, snake):
     ]
     
     return random.choice(possible_food_pos)
+
+def draw_food(screen, food_pos, grid_offset_x, grid_offset_y, cell_size):
+    
+    food_row = food_pos[0]
+    food_col = food_pos[1]
+    
+    pygame.draw.rect(
+            screen,
+            settings.FOOD_COLOR,
+            (
+                grid_offset_x + food_row * cell_size + 1,
+                grid_offset_y + food_col * cell_size + 1,
+                cell_size - 2,
+                cell_size - 2
+            )
+        )

@@ -4,4 +4,5 @@ BACKGROUND_COLOR = (58, 58, 58)
 GRID_COLOR = (5, 2, 3)
 SNAKE_COLOR = (0, 128, 0)
 FOOD_COLOR = (121, 6, 4)
-    
+
+FPS = 60
