@@ -6,8 +6,8 @@ from collections import deque
 
 def generate_snake(grid_size):
     return deque([[
-        random.randint(2, grid_size - 3), 
-        random.randint(2, grid_size - 3)
+        random.randint(5, grid_size - 6), 
+        random.randint(5, grid_size - 6)
     ]])
     
 def draw_snake(screen, snake, grid_offset_x, grid_offset_y, cell_size):

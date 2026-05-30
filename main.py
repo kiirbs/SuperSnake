@@ -4,6 +4,7 @@ import random
 import settings
 import food
 import snake
+import game
 from collections import deque
 
 # Setup
@@ -65,27 +66,21 @@ while running:
             pygame.draw.rect(screen, settings.GRID_COLOR, (x, y, cell_size, cell_size), 1)
             
     move_timer += dt
-    
     head = ingame_snake[0]
-    if food_pos != head:
-        food.draw_food(screen, food_pos, grid_offset_x, grid_offset_y, cell_size)
-        if move_timer >= 0.3:
-            move_timer = 0
-            direction = next_direction
-            ingame_snake, grow = snake.add_snake_case(direction, ingame_snake, grow)
-            head = ingame_snake[0]
-
-    else:
-        score += 1
-        grow = True
-        food_pos = food.generate_food(grid_size, ingame_snake)
-        if move_timer >= 0.3:
-            move_timer = 0
-            direction = next_direction
-            ingame_snake, grow = snake.add_snake_case(direction, ingame_snake, grow)
-            head = ingame_snake[0]
-
-        print(score)
+            
+    if move_timer >= 0.3:
+        move_timer = 0
+        direction, ingame_snake, grow, head = game.turn(
+            next_direction,
+            ingame_snake,
+            grow
+        )
+            
+        if head == food_pos:
+            score += 1
+            grow = True
+            food_pos = food.generate_food(grid_size, ingame_snake)
+            print(score)
         
     if (
         head[0] < 0 
@@ -100,8 +95,16 @@ while running:
     if head in list(ingame_snake)[1:]:
         running = False
         
+    food.draw_food(screen, food_pos, grid_offset_x, grid_offset_y, cell_size)
+
     for snake_case in ingame_snake:
-        snake.draw_snake(screen, snake_case, grid_offset_x, grid_offset_y, cell_size)
+        if (
+            head[0] >= 0 
+            and head[0] < grid_size 
+            and head[1] >= 0 
+            and head[1] < grid_size
+        ):
+            snake.draw_snake(screen, snake_case, grid_offset_x, grid_offset_y, cell_size)
     
     pygame.display.flip()
     
