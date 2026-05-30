@@ -8,10 +8,10 @@ remaster snake.
 - [X] Fenêtre
 - [X] Grille
 - [ ] Serpent
-- [ ] Déplacement
-- [ ] Nourriture
-- [ ] Score
-- [ ] Game Over
+- [X] Déplacement
+- [X] Nourriture
+- [X] Score
+- [X] Game Over
 
 ## Améliorations
 
