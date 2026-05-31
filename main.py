@@ -5,41 +5,43 @@ import settings
 import food
 import snake
 import game
-from collections import deque
+import grid
+import menu
 
-# Setup
+# Pygame Setup
 pygame.init()
-screen = pygame.display.set_mode((1280, 720))
+screen = pygame.display.set_mode(
+    (settings.DEFAULT_WIDTH, settings.DEFAULT_HEIGHT),
+    pygame.RESIZABLE
+)
 clock = pygame.time.Clock()
 running = True
 dt = 0
-move_timer = 0
-score = 0
-grow = False
 
+# Setup
+game_state = "MENU"
+difficulty = settings.NORMAL
+move_interval = difficulty["move_interval"]
 
 width = screen.get_width()
 height = screen.get_height()
 
+# Menu
+menu_font = pygame.font.Font(None, 36)
+buttons = []
+buttons = menu.draw_menu(screen, width, height, menu_font)
+
 # Grid
-grid_size = settings.DEFAULT_GRID_SIZE
+selected_grid_size = difficulty["grid_size"]
+grid_size = selected_grid_size
 cell_size = min(width, height) // grid_size
 
-# Snake
-ingame_snake = snake.generate_snake(grid_size)
-head = ingame_snake[0]
-direction = random.choice(["UP", "DOWN", "LEFT", "RIGHT"])
-next_direction = direction
-
-# Food
-food_pos = food.generate_food(grid_size, ingame_snake)
-
 while running:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+    for event in pygame.event.get():    # Check Event
+        if event.type == pygame.QUIT:   # Quit
             running = False
             
-        elif event.type == pygame.KEYDOWN:
+        elif event.type == pygame.KEYDOWN:  # ZQSD Check
             if event.key == pygame.K_z and direction != "DOWN":
                 next_direction = "UP"
             
@@ -51,63 +53,108 @@ while running:
                 
             elif event.key == pygame.K_d and direction != "LEFT":
                 next_direction = "RIGHT"
+                
+        elif event.type == pygame.VIDEORESIZE:  # Screen Resize
             
-    screen.fill(settings.BACKGROUND_COLOR)
+            width = event.w
+            height = event.h
+            
+            cell_size = min(width, height) // grid_size
+            
+        elif event.type == pygame.MOUSEBUTTONDOWN: # Clic
+            for value, button in buttons:
+                if button.collidepoint(event.pos):
+                    if value == "EASY":
+                        difficulty = settings.EASY
+                        selected_grid_size = difficulty["grid_size"]
+                        move_interval = difficulty["move_interval"]
+                        
+                    elif value == "NORMAL":
+                        difficulty = settings.NORMAL
+                        selected_grid_size = difficulty["grid_size"]
+                        move_interval = difficulty["move_interval"]
+                        
+                    elif value == "HARD":
+                        difficulty = settings.HARD
+                        selected_grid_size = difficulty["grid_size"]
+                        move_interval = difficulty["move_interval"]
+                        
+                    elif value == "ULTRA HARD":
+                        difficulty = settings.ULTRA_HARD
+                        selected_grid_size = difficulty["grid_size"]
+                        move_interval = difficulty["move_interval"]
+                                                
+                    game_state = "GAME"
+                    ingame_snake, head, direction, next_direction, grow, food_pos, score, move_timer = game.new_game(selected_grid_size)
+
+    if game_state == "MENU":
+        # Set screen color
+        screen.fill(settings.BACKGROUND_COLOR)
+        
+        buttons = menu.draw_menu(screen, width, height, menu_font)
+        
+        grid_size = selected_grid_size
+        cell_size = min(width, height) // grid_size
+                
+    elif game_state == "GAME":
+        # Set screen color
+        screen.fill(settings.BACKGROUND_COLOR)
     
-    grid_offset_x = (width - grid_size * cell_size) / 2
-    grid_offset_y = (height - grid_size * cell_size) / 2
+        # Offsets
+        grid_offset_x = (width - grid_size * cell_size) / 2
+        grid_offset_y = (height - grid_size * cell_size) / 2
 
-    for row in range(grid_size):
-        for col in range(grid_size):
+        # Draw Grid
+        grid.draw_grid(screen, grid_size, cell_size, grid_offset_x, grid_offset_y)
             
-            x = grid_offset_x + col * cell_size
-            y = grid_offset_y + row * cell_size
-            
-            pygame.draw.rect(screen, settings.GRID_COLOR, (x, y, cell_size, cell_size), 1)
-            
-    move_timer += dt
-    head = ingame_snake[0]
-            
-    if move_timer >= 0.3:
-        move_timer = 0
-        direction, ingame_snake, grow, head = game.turn(
-            next_direction,
-            ingame_snake,
-            grow
-        )
-            
-        if head == food_pos:
-            score += 1
-            grow = True
-            food_pos = food.generate_food(grid_size, ingame_snake)
-            print(score)
-        
-    if (
-        head[0] < 0 
-        or head[0] >= grid_size 
-        or head[1] < 0 
-        or head[1] >= grid_size
-    ):
-        running = False
-        
-    head = ingame_snake[0]
+        move_timer += dt
+        head = ingame_snake[0]
 
-    if head in list(ingame_snake)[1:]:
-        running = False
-        
-    food.draw_food(screen, food_pos, grid_offset_x, grid_offset_y, cell_size)
+        # Turn
+        if move_timer >= move_interval:
+            move_timer = 0
+            direction, ingame_snake, grow, head = game.turn(
+                next_direction,
+                ingame_snake,
+                grow
+            )
 
-    for snake_case in ingame_snake:
-        if (
-            head[0] >= 0 
-            and head[0] < grid_size 
-            and head[1] >= 0 
-            and head[1] < grid_size
-        ):
-            snake.draw_snake(screen, snake_case, grid_offset_x, grid_offset_y, cell_size)
+            if head == food_pos:
+                score += 1
+                grow = True
+                food_pos = food.generate_food(grid_size, ingame_snake)
+                print(score)
     
+        # Grid-Out Check
+        if game.grid_out_check(head, grid_size, running):
+            game_state = "GAME_OVER"
+        
+        # Que-Eating Check
+        if game.eat_que_check(ingame_snake, head, running):
+            game_state = "GAME_OVER"
+    
+        # Draw Food
+        food.draw_food(screen, food_pos, grid_offset_x, grid_offset_y, cell_size)
+
+        for snake_case in ingame_snake:
+            if (
+                head[0] >= 0 
+                and head[0] < grid_size 
+                and head[1] >= 0 
+                and head[1] < grid_size
+            ):
+                snake.draw_snake(screen, snake_case, grid_offset_x, grid_offset_y, cell_size) # Draw Snake
+        
+    elif game_state == "GAME_OVER":
+        
+        
+        # Set screen color
+        screen.fill(settings.BACKGROUND_COLOR)
+        
+    # Print
     pygame.display.flip()
     
+    # Clock
     dt = clock.tick(settings.FPS) / 1000
 
 pygame.quit()

@@ -2,7 +2,6 @@ import pygame
 import random
 
 import settings
-from collections import deque
 
 def generate_food(grid_size, snake):
     

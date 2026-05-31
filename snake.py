@@ -1,8 +1,8 @@
 import random
 import pygame
+from collections import deque
 
 import settings
-from collections import deque
 
 def generate_snake(grid_size):
     return deque([[
