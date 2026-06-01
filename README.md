@@ -12,7 +12,7 @@ remaster snake.
 - [X] Nourriture
 - [X] Score
 - [X] Game Over
-- [ ] Menu
+- [X] Menu
 - [ ] Multi
 - [ ] Bot
 

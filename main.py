@@ -83,10 +83,13 @@ while running:
                         difficulty = settings.ULTRA_HARD
                         selected_grid_size = difficulty["grid_size"]
                         move_interval = difficulty["move_interval"]
-                                                
-                    game_state = "GAME"
+                            
+                    grid_size = selected_grid_size 
+                    cell_size = min(width, height) // grid_size                   
                     ingame_snake, head, direction, next_direction, grow, food_pos, score, move_timer = game.new_game(selected_grid_size)
+                    game_state = "GAME"
 
+    
     if game_state == "MENU":
         # Set screen color
         screen.fill(settings.BACKGROUND_COLOR)
@@ -125,14 +128,17 @@ while running:
                 food_pos = food.generate_food(grid_size, ingame_snake)
                 print(score)
     
+        head = ingame_snake[0]
+    
         # Grid-Out Check
-        if game.grid_out_check(head, grid_size, running):
+        if game.grid_out_check(head, grid_size, ingame_snake):
             game_state = "GAME_OVER"
         
         # Que-Eating Check
-        if game.eat_que_check(ingame_snake, head, running):
+        if game.eat_que_check(ingame_snake, head):
             game_state = "GAME_OVER"
     
+        head = ingame_snake[0]
         # Draw Food
         food.draw_food(screen, food_pos, grid_offset_x, grid_offset_y, cell_size)
 

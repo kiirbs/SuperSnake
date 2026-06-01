@@ -37,23 +37,26 @@ def turn(next_direction, ingame_snake, grow):
             
     return direction, ingame_snake, grow, head
 
-def grid_out_check(head, grid_size, running):
+def grid_out_check(head, grid_size, ingame_snake):
+    
+    head = ingame_snake[0]
+    
     if (
         head[0] < 0 
         or head[0] >= grid_size 
         or head[1] < 0 
         or head[1] >= grid_size
     ):
-        running = False
-        
-    return running
+        return True
+    
+    return False
 
-def eat_que_check(ingame_snake, head, running):
+def eat_que_check(ingame_snake, head):
     
     head = ingame_snake[0]
 
     if head in list(ingame_snake)[1:]:
-        running = False
-        
-    return running
+        return True
+    
+    return False
             
