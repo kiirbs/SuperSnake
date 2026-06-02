@@ -1,5 +1,4 @@
 import pygame
-import random
 
 import settings
 import food
@@ -27,14 +26,17 @@ width = screen.get_width()
 height = screen.get_height()
 
 # Menu
-menu_font = pygame.font.Font(None, 36)
 buttons = []
-buttons = menu.draw_menu(screen, width, height, menu_font)
+buttons = menu.draw_menu(screen, width, height)
 
 # Grid
 selected_grid_size = difficulty["grid_size"]
 grid_size = selected_grid_size
 cell_size = min(width, height) // grid_size
+
+# Food
+max_food = difficulty["max_food"]
+food_interval = difficulty["food_interval"]
 
 while running:
     for event in pygame.event.get():    # Check Event
@@ -68,33 +70,45 @@ while running:
                         difficulty = settings.EASY
                         selected_grid_size = difficulty["grid_size"]
                         move_interval = difficulty["move_interval"]
+                        max_food = difficulty["max_food"]
+                        food_interval = difficulty["food_interval"]
                         
                     elif value == "NORMAL":
                         difficulty = settings.NORMAL
                         selected_grid_size = difficulty["grid_size"]
                         move_interval = difficulty["move_interval"]
+                        max_food = difficulty["max_food"]
+                        food_interval = difficulty["food_interval"]
                         
                     elif value == "HARD":
                         difficulty = settings.HARD
                         selected_grid_size = difficulty["grid_size"]
                         move_interval = difficulty["move_interval"]
+                        max_food = difficulty["max_food"]
+                        food_interval = difficulty["food_interval"]
                         
                     elif value == "ULTRA HARD":
                         difficulty = settings.ULTRA_HARD
                         selected_grid_size = difficulty["grid_size"]
                         move_interval = difficulty["move_interval"]
+                        max_food = difficulty["max_food"]
+                        food_interval = difficulty["food_interval"]
                             
                     grid_size = selected_grid_size 
                     cell_size = min(width, height) // grid_size                   
-                    ingame_snake, head, direction, next_direction, grow, food_pos, score, move_timer = game.new_game(selected_grid_size)
+                    ingame_snake, head, direction, next_direction, grow, food_pos, score, move_timer, free_cases, food_interval = game.new_game(
+                        selected_grid_size, 
+                        max_food, 
+                        food_interval,
+                        difficulty
+                    )
                     game_state = "GAME"
 
-    
     if game_state == "MENU":
         # Set screen color
         screen.fill(settings.BACKGROUND_COLOR)
         
-        buttons = menu.draw_menu(screen, width, height, menu_font)
+        buttons = menu.draw_menu(screen, width, height)
         
         grid_size = selected_grid_size
         cell_size = min(width, height) // grid_size
@@ -122,10 +136,23 @@ while running:
                 grow
             )
 
-            if head == food_pos:
+            if head in food_pos:
                 score += 1
                 grow = True
-                food_pos = food.generate_food(grid_size, ingame_snake)
+                for i, item in enumerate(food_pos):
+                    if item == head:
+                        food_pos[i] = food.generate_food(
+                            grid_size, 
+                            ingame_snake,
+                            food_pos, 
+                            head
+                        )
+                if free_cases <= food_interval:
+                    max_food -= 1
+                    food_pos.pop()
+                    if free_cases <= 0:
+                        game_state = "WIN"
+                    
                 print(score)
     
         head = ingame_snake[0]
@@ -137,10 +164,10 @@ while running:
         # Que-Eating Check
         if game.eat_que_check(ingame_snake, head):
             game_state = "GAME_OVER"
-    
-        head = ingame_snake[0]
+
         # Draw Food
-        food.draw_food(screen, food_pos, grid_offset_x, grid_offset_y, cell_size)
+        for item in food_pos:
+            food.draw_food(screen, item, grid_offset_x, grid_offset_y, cell_size)
 
         for snake_case in ingame_snake:
             if (

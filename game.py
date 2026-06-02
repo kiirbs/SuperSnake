@@ -2,8 +2,22 @@ import random
 
 import snake
 import food
+import settings
 
-def new_game(grid_size):
+def free_case_check(grid_size, ingame_snake, max_food, head):
+    
+    grid_len = grid_size ** 2
+    
+    snake_len = 0
+    for _ in ingame_snake:
+        snake_len += 1
+        
+    if head not in ingame_snake:
+        snake_len += 1
+        
+    return grid_len - snake_len - max_food
+
+def new_game(grid_size, max_food, food_interval, difficulty):
     
     # Snake
     ingame_snake = snake.generate_snake(grid_size)
@@ -13,7 +27,11 @@ def new_game(grid_size):
     grow = False
     
     # Food
-    food_pos = food.generate_food(grid_size, ingame_snake)
+    food_pos = []
+    for _ in range(max_food):
+        food_pos.append(food.generate_food(grid_size, ingame_snake, food_pos, head))
+        
+    food_interval = (difficulty["max_food"] - (max_food - 1)) * difficulty["food_interval"]
     
     # Score
     score = 0
@@ -21,7 +39,10 @@ def new_game(grid_size):
     # Auto-move
     move_timer = 0
     
-    return ingame_snake, head, direction, next_direction, grow, food_pos, score, move_timer
+    # Free Cases
+    free_cases = free_case_check(grid_size, ingame_snake, max_food, head)
+    
+    return ingame_snake, head, direction, next_direction, grow, food_pos, score, move_timer, free_cases, food_interval
 
 def turn(next_direction, ingame_snake, grow):
     
@@ -59,4 +80,3 @@ def eat_que_check(ingame_snake, head):
         return True
     
     return False
-            

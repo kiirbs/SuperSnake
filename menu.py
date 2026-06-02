@@ -2,7 +2,7 @@ import pygame
 
 import settings
 
-def draw_menu(screen, width, height, menu_font):
+def draw_menu(screen, width, height):
     
     buttons = []
     
@@ -11,9 +11,11 @@ def draw_menu(screen, width, height, menu_font):
     dw = width / settings.DEFAULT_WIDTH
     dh = height / settings.DEFAULT_HEIGHT
         
-    button_width = max(88, int(settings.DEFAULT_BUTTON_WIDTH * dw))
-    button_height = max(50, int(settings.DEFAULT_BUTTON_HEIGHT * dh))
-    button_offset = max(6, int(settings.DEFAULT_BUTTON_MARGE * dh))
+    button_width = max(100, int(settings.DEFAULT_BUTTON_WIDTH * dw))
+    button_height = max(25, int(settings.DEFAULT_BUTTON_HEIGHT * dh))
+    button_offset = max(3, int(settings.DEFAULT_BUTTON_MARGE * dh))
+    
+    menu_font = pygame.font.Font(None, max(3, int(settings.DEFAULT_MENU_FONT * dh)))
     
     menu_width = button_width
     menu_height = ((
