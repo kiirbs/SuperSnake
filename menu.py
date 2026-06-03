@@ -4,6 +4,8 @@ import settings
 
 def draw_menu(screen, width, height):
     
+    mouse_pos = pygame.mouse.get_pos()
+    
     buttons = []
     
     difficult_len = len(settings.DIFFICULT)
@@ -28,12 +30,6 @@ def draw_menu(screen, width, height):
     y = (height - menu_height) // 2
         
     for button_text in settings.DIFFICULT:
-                
-        text_surface = menu_font.render(
-            button_text,
-            True,
-            settings.TEXT_COLOR
-        )
         
         button_rect = pygame.Rect(
             x, 
@@ -41,12 +37,32 @@ def draw_menu(screen, width, height):
             button_width, 
             button_height
         )
+                
+        if button_rect.collidepoint(mouse_pos):
+            color = settings.MENU_HOVER_COLOR
+            text_color = settings.TEXT_HOVER_COLOR
+            
+            button_rect = pygame.Rect(
+                x - 5,
+                y - 5,
+                button_width + 10,
+                button_height + 10
+            )
+        else:
+            color = settings.MENU_COLOR
+            text_color = settings.TEXT_COLOR
         
         buttons.append((button_text, button_rect))
         
+        text_surface = menu_font.render(
+            button_text,
+            True,
+            text_color
+        )
+        
         pygame.draw.rect(
             screen,
-            settings.MENU_COLOR,
+            color,
             button_rect,
         )
         

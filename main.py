@@ -181,8 +181,10 @@ while running:
                 snake.draw_snake(screen, snake_case, grid_offset_x, grid_offset_y, cell_size) # Draw Snake
         
     elif game_state == "GAME_OVER":
+        # Set screen color
+        screen.fill(settings.BACKGROUND_COLOR)
         
-        
+    elif game_state == "WIN":
         # Set screen color
         screen.fill(settings.BACKGROUND_COLOR)
         
