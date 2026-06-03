@@ -139,6 +139,7 @@ while running:
             if head in food_pos:
                 score += 1
                 grow = True
+                free_cases = game.free_case_check(grid_size, ingame_snake, max_food, head)
                 for i, item in enumerate(food_pos):
                     if item == head:
                         food_pos[i] = food.generate_food(
@@ -149,6 +150,7 @@ while running:
                         )
                 if free_cases <= food_interval:
                     max_food -= 1
+                    food_interval = (max_food - 1) * difficulty["food_interval"]
                     food_pos.pop()
                     if free_cases <= 0:
                         game_state = "WIN"

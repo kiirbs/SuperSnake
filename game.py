@@ -31,7 +31,8 @@ def new_game(grid_size, max_food, food_interval, difficulty):
     for _ in range(max_food):
         food_pos.append(food.generate_food(grid_size, ingame_snake, food_pos, head))
         
-    food_interval = (difficulty["max_food"] - (max_food - 1)) * difficulty["food_interval"]
+    food_interval = (max_food - 1) * difficulty["food_interval"]
+    # food_interval = (difficulty["max_food"] - (max_food - 1)) * difficulty["food_interval"]
     
     # Score
     score = 0
