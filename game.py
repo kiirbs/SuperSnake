@@ -80,3 +80,13 @@ def eat_que_check(ingame_snake, head):
         return True
     
     return False
+
+def game_setup(difficulty):
+    
+    selected_grid_size = difficulty["grid_size"]
+    move_interval = difficulty["move_interval"]
+    max_food = difficulty["max_food"]
+    food_interval = difficulty["food_interval"]
+    game_state = "GAME"
+    
+    return selected_grid_size, move_interval, max_food, food_interval, game_state, difficulty

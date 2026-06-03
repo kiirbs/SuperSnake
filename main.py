@@ -44,16 +44,16 @@ while running:
             running = False
             
         elif event.type == pygame.KEYDOWN:  # ZQSD Check
-            if event.key == pygame.K_z and direction != "DOWN":
+            if (event.key == pygame.K_z or event.key == pygame.K_UP) and direction != "DOWN":
                 next_direction = "UP"
             
-            elif event.key == pygame.K_s and direction != "UP":
+            elif (event.key == pygame.K_s or event.key == pygame.K_DOWN) and direction != "UP":
                 next_direction = "DOWN"
                 
-            elif event.key == pygame.K_q and direction != "RIGHT":
+            elif (event.key == pygame.K_q or event.key == pygame.K_LEFT) and direction != "RIGHT":
                 next_direction = "LEFT"
                 
-            elif event.key == pygame.K_d and direction != "LEFT":
+            elif (event.key == pygame.K_d or event.key == pygame.K_RIGHT) and direction != "LEFT":
                 next_direction = "RIGHT"
                 
         elif event.type == pygame.VIDEORESIZE:  # Screen Resize
@@ -67,32 +67,22 @@ while running:
             for value, button in buttons:
                 if button.collidepoint(event.pos):
                     if value == "EASY":
-                        difficulty = settings.EASY
-                        selected_grid_size = difficulty["grid_size"]
-                        move_interval = difficulty["move_interval"]
-                        max_food = difficulty["max_food"]
-                        food_interval = difficulty["food_interval"]
+                        selected_grid_size, move_interval, max_food, food_interval, game_state, difficulty = game.game_setup(settings.EASY)
                         
                     elif value == "NORMAL":
-                        difficulty = settings.NORMAL
-                        selected_grid_size = difficulty["grid_size"]
-                        move_interval = difficulty["move_interval"]
-                        max_food = difficulty["max_food"]
-                        food_interval = difficulty["food_interval"]
+                        selected_grid_size, move_interval, max_food, food_interval, game_state, difficulty = game.game_setup(settings.NORMAL)
                         
                     elif value == "HARD":
-                        difficulty = settings.HARD
-                        selected_grid_size = difficulty["grid_size"]
-                        move_interval = difficulty["move_interval"]
-                        max_food = difficulty["max_food"]
-                        food_interval = difficulty["food_interval"]
+                        selected_grid_size, move_interval, max_food, food_interval, game_state, difficulty = game.game_setup(settings.HARD)
                         
                     elif value == "ULTRA HARD":
-                        difficulty = settings.ULTRA_HARD
-                        selected_grid_size = difficulty["grid_size"]
-                        move_interval = difficulty["move_interval"]
-                        max_food = difficulty["max_food"]
-                        food_interval = difficulty["food_interval"]
+                        selected_grid_size, move_interval, max_food, food_interval, game_state, difficulty = game.game_setup(settings.ULTRA_HARD)
+                        
+                    elif value == "TRY AGAIN":
+                        selected_grid_size, move_interval, max_food, food_interval, game_state, difficulty = game.game_setup(difficulty)
+                        
+                    elif value == "RETURN TO MENU":
+                        game_state = "MENU"
                             
                     grid_size = selected_grid_size 
                     cell_size = min(width, height) // grid_size                   
@@ -102,7 +92,6 @@ while running:
                         food_interval,
                         difficulty
                     )
-                    game_state = "GAME"
 
     if game_state == "MENU":
         # Set screen color
@@ -184,9 +173,19 @@ while running:
         # Set screen color
         screen.fill(settings.BACKGROUND_COLOR)
         
+        buttons = menu.draw_game_over(screen, width, height)
+        
+        grid_size = selected_grid_size
+        cell_size = min(width, height) // grid_size
+        
     elif game_state == "WIN":
         # Set screen color
         screen.fill(settings.BACKGROUND_COLOR)
+        
+        buttons = menu.draw_game_over(screen, width, height)
+        
+        grid_size = selected_grid_size
+        cell_size = min(width, height) // grid_size
         
     # Print
     pygame.display.flip()

@@ -17,7 +17,9 @@ def draw_menu(screen, width, height):
     button_height = max(25, int(settings.DEFAULT_BUTTON_HEIGHT * dh))
     button_offset = max(3, int(settings.DEFAULT_BUTTON_MARGE * dh))
     
-    menu_font = pygame.font.Font(None, max(3, int(settings.DEFAULT_MENU_FONT * dh)))
+    base_font_size = max(3, int(settings.DEFAULT_MENU_FONT * dh))
+    menu_font = pygame.font.Font(None, base_font_size)
+    hover_font = pygame.font.Font(None, int(base_font_size * 1.1))
     
     menu_width = button_width
     menu_height = ((
@@ -41,7 +43,8 @@ def draw_menu(screen, width, height):
         if button_rect.collidepoint(mouse_pos):
             color = settings.MENU_HOVER_COLOR
             text_color = settings.TEXT_HOVER_COLOR
-            
+            font = hover_font
+                        
             button_rect = pygame.Rect(
                 x - 5,
                 y - 5,
@@ -51,10 +54,11 @@ def draw_menu(screen, width, height):
         else:
             color = settings.MENU_COLOR
             text_color = settings.TEXT_COLOR
+            font = menu_font
         
         buttons.append((button_text, button_rect))
-        
-        text_surface = menu_font.render(
+
+        text_surface = font.render(
             button_text,
             True,
             text_color
@@ -73,5 +77,76 @@ def draw_menu(screen, width, height):
         screen.blit(text_surface, text_rect)
         
         y += offset
+        
+    return buttons
+
+def draw_game_over(screen, width, height):
+    
+    mouse_pos = pygame.mouse.get_pos()
+    
+    buttons = []
+    
+    dw = width / settings.DEFAULT_WIDTH
+    dh = height / settings.DEFAULT_HEIGHT
+    
+    button_width = max(50, int(settings.DEFAULT_BUTTON_WIDTH / 3 * dw))
+    button_height = max(12, int(settings.DEFAULT_BUTTON_HEIGHT / 3 * dh))
+    button_offset = max(3, int(settings.DEFAULT_BUTTON_MARGE * 4 * dh))
+    
+    button_pos = int(width / (len(settings.GAME_OVER) + 1))
+    
+    base_font_size = max(3, int(settings.DEFAULT_GAME_OVER_FONT * dh))
+    menu_font = pygame.font.Font(None, base_font_size)
+    hover_font = pygame.font.Font(None, int(base_font_size * 1.1))
+    
+    x = int(button_pos - (button_width / 2))
+    y = height - (button_offset + button_height)
+    
+    for button_text in settings.GAME_OVER:
+        
+        button_rect = pygame.Rect(
+            x, 
+            y,
+            button_width, 
+            button_height
+        )
+        
+        if button_rect.collidepoint(mouse_pos):
+            color = settings.MENU_HOVER_COLOR
+            text_color = settings.TEXT_HOVER_COLOR
+            font = hover_font
+                        
+            button_rect = pygame.Rect(
+                x - 5,
+                y - 5,
+                button_width + 10,
+                button_height + 10
+            )
+        else:
+            color = settings.MENU_COLOR
+            text_color = settings.TEXT_COLOR
+            font = menu_font
+            
+        buttons.append((button_text, button_rect))
+
+        text_surface = font.render(
+            button_text,
+            True,
+            text_color
+        )
+        
+        pygame.draw.rect(
+            screen,
+            color,
+            button_rect,
+        )
+        
+        text_rect = text_surface.get_rect(
+            center=button_rect.center
+        )
+        
+        screen.blit(text_surface, text_rect)
+        
+        x += button_pos
         
     return buttons
