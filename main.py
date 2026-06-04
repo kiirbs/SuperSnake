@@ -145,6 +145,8 @@ while running:
                         game_state = "WIN"
                     
                 print(score)
+                
+        game.draw_score(screen, score, width, height)
     
         head = ingame_snake[0]
     
@@ -173,6 +175,10 @@ while running:
         # Set screen color
         screen.fill(settings.BACKGROUND_COLOR)
         
+        menu.print_game_result(screen, "GAME OVER", width, height)
+        
+        game.draw_score(screen, score, width, height)
+        
         buttons = menu.draw_game_over(screen, width, height)
         
         grid_size = selected_grid_size
@@ -181,6 +187,10 @@ while running:
     elif game_state == "WIN":
         # Set screen color
         screen.fill(settings.BACKGROUND_COLOR)
+        
+        menu.print_game_result(screen, "YOU WIN", width, height)
+        
+        game.draw_score(screen, score, width, height)
         
         buttons = menu.draw_game_over(screen, width, height)
         

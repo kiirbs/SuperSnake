@@ -1,4 +1,5 @@
 import random
+import pygame
 
 import snake
 import food
@@ -90,3 +91,39 @@ def game_setup(difficulty):
     game_state = "GAME"
     
     return selected_grid_size, move_interval, max_food, food_interval, game_state, difficulty
+
+def draw_score(screen, score, width, height):
+    
+    dw = width / settings.DEFAULT_WIDTH
+    dh = height / settings.DEFAULT_HEIGHT
+    
+    score_width = max(25, int(settings.DEFAULT_BUTTON_WIDTH / 2.5 * dw))
+    score_height = max(6, int(settings.DEFAULT_BUTTON_HEIGHT / 2.5 * dh))
+    
+    base_font_size = max(3, int(settings.DEFAULT_SCORE_FONT * dh))
+    score_font = pygame.font.Font(None, base_font_size)
+    
+    button_rect = pygame.Rect(
+            int(40 * dw), 
+            int(40 * dh),
+            score_width,
+            score_height
+        )
+    
+    text_surface = score_font.render(
+        f"Score : {score}",
+        True,
+        settings.TEXT_COLOR
+        )
+        
+    pygame.draw.rect(
+        screen,
+        settings.SCORE_COLOR,
+        button_rect,
+    )
+        
+    text_rect = text_surface.get_rect(
+        center=button_rect.center
+    )
+        
+    screen.blit(text_surface, text_rect)

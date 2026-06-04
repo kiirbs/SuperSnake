@@ -89,8 +89,8 @@ def draw_game_over(screen, width, height):
     dw = width / settings.DEFAULT_WIDTH
     dh = height / settings.DEFAULT_HEIGHT
     
-    button_width = max(50, int(settings.DEFAULT_BUTTON_WIDTH / 3 * dw))
-    button_height = max(12, int(settings.DEFAULT_BUTTON_HEIGHT / 3 * dh))
+    button_width = max(50, int(settings.DEFAULT_BUTTON_WIDTH / 1.5 * dw))
+    button_height = max(12, int(settings.DEFAULT_BUTTON_HEIGHT / 1.5 * dh))
     button_offset = max(3, int(settings.DEFAULT_BUTTON_MARGE * 4 * dh))
     
     button_pos = int(width / (len(settings.GAME_OVER) + 1))
@@ -150,3 +150,27 @@ def draw_game_over(screen, width, height):
         x += button_pos
         
     return buttons
+
+def print_game_result(screen, game_result, width, height):
+    
+    dh = height / settings.DEFAULT_HEIGHT
+    
+    button_height = max(12, int(settings.DEFAULT_BUTTON_HEIGHT / 1.5 * dh))
+    button_offset = max(3, int(settings.DEFAULT_BUTTON_MARGE * 4 * dh))
+    
+    y = button_offset + button_height
+    
+    base_font_size = max(3, int(settings.DEFAULT_TITLE_FONT * dh))
+    font = pygame.font.Font(None, base_font_size)
+
+    text_surface = font.render(
+        game_result,
+        True,
+        settings.TEXT_COLOR
+    )
+    
+    text_rect = text_surface.get_rect(
+        center=(width // 2, (height - y) // 2)
+    )
+    
+    screen.blit(text_surface, text_rect)
