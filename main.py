@@ -22,6 +22,7 @@ game_state = "MENU"
 best_score = 0
 difficulty = settings.NORMAL
 move_interval = difficulty["move_interval"]
+direction = None
 
 width = screen.get_width()
 height = screen.get_height()
@@ -44,18 +45,21 @@ while running:
         if event.type == pygame.QUIT:   # Quit
             running = False
             
-        elif event.type == pygame.KEYDOWN:  # ZQSD Check
-            if (event.key == pygame.K_z or event.key == pygame.K_UP) and direction != "DOWN":
+        elif event.type == pygame.KEYDOWN:  # ZQSD Check + ULDR Check + SPACE Check
+            if (event.key == pygame.K_z or event.key == pygame.K_UP) and direction != "DOWN" and game_state != "PAUSE":
                 next_direction = "UP"
             
-            elif (event.key == pygame.K_s or event.key == pygame.K_DOWN) and direction != "UP":
+            elif (event.key == pygame.K_s or event.key == pygame.K_DOWN) and direction != "UP" and game_state != "PAUSE":
                 next_direction = "DOWN"
                 
-            elif (event.key == pygame.K_q or event.key == pygame.K_LEFT) and direction != "RIGHT":
+            elif (event.key == pygame.K_q or event.key == pygame.K_LEFT) and direction != "RIGHT" and game_state != "PAUSE":
                 next_direction = "LEFT"
                 
-            elif (event.key == pygame.K_d or event.key == pygame.K_RIGHT) and direction != "LEFT":
+            elif (event.key == pygame.K_d or event.key == pygame.K_RIGHT) and direction != "LEFT" and game_state != "PAUSE":
                 next_direction = "RIGHT"
+                
+            elif event.key == pygame.K_SPACE and (game_state == "GAME" or game_state == "PAUSE"):
+                game_state = "PAUSE" if game_state == "GAME" else "GAME"
                 
         elif event.type == pygame.VIDEORESIZE:  # Screen Resize
             
@@ -173,6 +177,29 @@ while running:
                 and head[1] < grid_size
             ):
                 snake.draw_snake(screen, snake_case, grid_offset_x, grid_offset_y, cell_size) # Draw Snake
+        
+    elif game_state == "PAUSE":
+        # Set screen color
+        screen.fill(settings.BACKGROUND_COLOR)
+        
+        # Offsets
+        grid_offset_x = (width - grid_size * cell_size) / 2
+        grid_offset_y = 100 + (((height - 150) - grid_size * cell_size) / 2)
+        
+        # Draw Grid
+        grid.draw_grid(screen, grid_size, cell_size, grid_offset_x, grid_offset_y)
+        
+        # Draw Food
+        for item in food_pos:
+            food.draw_food(screen, item, grid_offset_x, grid_offset_y, cell_size)
+        
+        # Draw Snake
+        for snake_case in ingame_snake:
+            snake.draw_snake(screen, snake_case, grid_offset_x, grid_offset_y, cell_size)
+            
+        game.draw_score(screen, score, best_score, width, height)
+            
+        menu.print_game_result(screen, "PAUSED", width, height)
         
     elif game_state == "GAME_OVER":
         # Set screen color
