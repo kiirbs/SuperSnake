@@ -36,7 +36,6 @@ def new_game(grid_size, max_food, food_interval, difficulty):
         
     # Score
     score = 0
-    best_score = 0
     
     # Auto-move
     move_timer = 0
@@ -44,7 +43,7 @@ def new_game(grid_size, max_food, food_interval, difficulty):
     # Free Cases
     free_cases = free_case_check(grid_size, ingame_snake, max_food, head)
     
-    return ingame_snake, head, direction, next_direction, grow, food_pos, score, best_score, move_timer, free_cases, food_interval
+    return ingame_snake, head, direction, next_direction, grow, food_pos, score, move_timer, free_cases, food_interval
 
 def turn(next_direction, ingame_snake, grow):
     
@@ -104,27 +103,52 @@ def draw_score(screen, score, best_score, width, height):
     base_font_size = max(3, int(settings.DEFAULT_SCORE_FONT * dh))
     score_font = pygame.font.Font(None, base_font_size)
     
-    button_rect = pygame.Rect(
-            int(40 * dw), 
-            int(40 * dh),
-            score_width,
-            score_height
-        )
+    score_rect = pygame.Rect(
+        int(40 * dw), 
+        int((30 + score_height) * dh),
+        score_width,
+        score_height
+    )
     
-    text_surface = score_font.render(
-        f"Score : {score}",
+    best_score_rect = pygame.Rect(
+        int(40 * dw), 
+        int(20 * dh),
+        score_width,
+        score_height
+    )
+    
+    score_text_surface = score_font.render(
+        f"SCORE : {score}",
         True,
         settings.TEXT_COLOR
-        )
+    )
+    
+    best_score_text_surface = score_font.render(
+        f"BEST : {best_score}",
+        True,
+        settings.TEXT_COLOR
+    )
         
     pygame.draw.rect(
         screen,
         settings.SCORE_COLOR,
-        button_rect,
+        score_rect,
+    )
+    
+    pygame.draw.rect(
+        screen,
+        settings.SCORE_COLOR,
+        best_score_rect,
     )
         
-    text_rect = text_surface.get_rect(
-        center=button_rect.center
+    score_text_rect = score_text_surface.get_rect(
+        center=score_rect.center
+    )
+    
+    best_score_text_rect = best_score_text_surface.get_rect(
+        center=best_score_rect.center
     )
         
-    screen.blit(text_surface, text_rect)
+    screen.blit(score_text_surface, score_text_rect)
+    
+    screen.blit(best_score_text_surface, best_score_text_rect)

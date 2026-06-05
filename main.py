@@ -19,6 +19,7 @@ dt = 0
 
 # Setup
 game_state = "MENU"
+best_score = 0
 difficulty = settings.NORMAL
 move_interval = difficulty["move_interval"]
 
@@ -83,10 +84,11 @@ while running:
                         
                     elif value == "RETURN TO MENU":
                         game_state = "MENU"
+                        best_score = 0
                             
                     grid_size = selected_grid_size 
                     cell_size = min(width, height - 150) // grid_size                   
-                    ingame_snake, head, direction, next_direction, grow, food_pos, score, best_score, move_timer, free_cases, food_interval = game.new_game(
+                    ingame_snake, head, direction, next_direction, grow, food_pos, score, move_timer, free_cases, food_interval = game.new_game(
                         selected_grid_size, 
                         max_food, 
                         food_interval,
@@ -143,8 +145,6 @@ while running:
                     food_pos.pop()
                     if free_cases <= 0:
                         game_state = "WIN"
-                    
-                print(score)
                 
         if score > best_score:
             best_score = score
