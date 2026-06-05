@@ -36,6 +36,7 @@ def new_game(grid_size, max_food, food_interval, difficulty):
         
     # Score
     score = 0
+    best_score = 0
     
     # Auto-move
     move_timer = 0
@@ -43,7 +44,7 @@ def new_game(grid_size, max_food, food_interval, difficulty):
     # Free Cases
     free_cases = free_case_check(grid_size, ingame_snake, max_food, head)
     
-    return ingame_snake, head, direction, next_direction, grow, food_pos, score, move_timer, free_cases, food_interval
+    return ingame_snake, head, direction, next_direction, grow, food_pos, score, best_score, move_timer, free_cases, food_interval
 
 def turn(next_direction, ingame_snake, grow):
     
@@ -92,7 +93,7 @@ def game_setup(difficulty):
     
     return selected_grid_size, move_interval, max_food, food_interval, game_state, difficulty
 
-def draw_score(screen, score, width, height):
+def draw_score(screen, score, best_score, width, height):
     
     dw = width / settings.DEFAULT_WIDTH
     dh = height / settings.DEFAULT_HEIGHT

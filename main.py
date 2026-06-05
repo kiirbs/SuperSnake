@@ -32,7 +32,7 @@ buttons = menu.draw_menu(screen, width, height)
 # Grid
 selected_grid_size = difficulty["grid_size"]
 grid_size = selected_grid_size
-cell_size = min(width, height) // grid_size
+cell_size = min(width, height - 150) // grid_size
 
 # Food
 max_food = difficulty["max_food"]
@@ -61,7 +61,7 @@ while running:
             width = event.w
             height = event.h
             
-            cell_size = min(width, height) // grid_size
+            cell_size = min(width, height - 150) // grid_size
             
         elif event.type == pygame.MOUSEBUTTONDOWN: # Clic
             for value, button in buttons:
@@ -85,8 +85,8 @@ while running:
                         game_state = "MENU"
                             
                     grid_size = selected_grid_size 
-                    cell_size = min(width, height) // grid_size                   
-                    ingame_snake, head, direction, next_direction, grow, food_pos, score, move_timer, free_cases, food_interval = game.new_game(
+                    cell_size = min(width, height - 150) // grid_size                   
+                    ingame_snake, head, direction, next_direction, grow, food_pos, score, best_score, move_timer, free_cases, food_interval = game.new_game(
                         selected_grid_size, 
                         max_food, 
                         food_interval,
@@ -100,7 +100,7 @@ while running:
         buttons = menu.draw_menu(screen, width, height)
         
         grid_size = selected_grid_size
-        cell_size = min(width, height) // grid_size
+        cell_size = min(width, height - 150) // grid_size
                 
     elif game_state == "GAME":
         # Set screen color
@@ -108,7 +108,7 @@ while running:
     
         # Offsets
         grid_offset_x = (width - grid_size * cell_size) / 2
-        grid_offset_y = (height - grid_size * cell_size) / 2
+        grid_offset_y = 100 + (((height - 150) - grid_size * cell_size) / 2)
 
         # Draw Grid
         grid.draw_grid(screen, grid_size, cell_size, grid_offset_x, grid_offset_y)
@@ -146,7 +146,10 @@ while running:
                     
                 print(score)
                 
-        game.draw_score(screen, score, width, height)
+        if score > best_score:
+            best_score = score
+                
+        game.draw_score(screen, score, best_score, width, height)
     
         head = ingame_snake[0]
     
@@ -177,12 +180,12 @@ while running:
         
         menu.print_game_result(screen, "GAME OVER", width, height)
         
-        game.draw_score(screen, score, width, height)
+        game.draw_score(screen, score, best_score, width, height)
         
         buttons = menu.draw_game_over(screen, width, height)
         
         grid_size = selected_grid_size
-        cell_size = min(width, height) // grid_size
+        cell_size = min(width, height - 150) // grid_size
         
     elif game_state == "WIN":
         # Set screen color
@@ -190,12 +193,12 @@ while running:
         
         menu.print_game_result(screen, "YOU WIN", width, height)
         
-        game.draw_score(screen, score, width, height)
+        game.draw_score(screen, score, best_score, width, height)
         
         buttons = menu.draw_game_over(screen, width, height)
         
         grid_size = selected_grid_size
-        cell_size = min(width, height) // grid_size
+        cell_size = min(width, height - 150) // grid_size
         
     # Print
     pygame.display.flip()

@@ -1,25 +1,30 @@
 # SuperSnake
 
-First python project,
-remaster snake.
+First python project, remaster snake.
 
 ## MVP
 
-- [X] Fenêtre
+- [X] Fenêtre redimensionnable
 - [X] Grille
-- [X] Serpent
+- [X] Serpent + croissance
 - [X] Déplacement
 - [X] Nourriture
-- [X] Score
+- [X] Score en jeu
+- [X] Score en fin de partie
+- [X] Win
 - [X] Game Over
-- [X] Menu
+- [X] Menu principal
+- [X] Difficultés
 - [ ] Multi
 - [ ] Bot
 
 ## Améliorations
 
-- [ ] Effets visuels
-- [ ] Sons
+- [X] Plus de nourriture
+- [X] Bouttons interactifs
+- [ ] Vitesse progressive
 - [ ] Obstacles
 - [ ] Power-ups
+- [ ] Effets visuels
+- [ ] Sons
 
