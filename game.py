@@ -105,7 +105,7 @@ def draw_score(screen, score, best_score, width, height):
     
     score_rect = pygame.Rect(
         int(40 * dw), 
-        int((30 + score_height) * dh),
+        int((30 * dh) + score_height),
         score_width,
         score_height
     )

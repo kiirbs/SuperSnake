@@ -1,4 +1,5 @@
 import pygame
+from collections import deque
 
 import settings
 import food
@@ -28,8 +29,8 @@ width = screen.get_width()
 height = screen.get_height()
 
 # Menu
-buttons = []
-buttons = menu.draw_menu(screen, width, height)
+buttons = deque([])
+buttons = menu.draw_menu(screen, width, height, settings.MENU)
 
 # Grid
 selected_grid_size = difficulty["grid_size"]
@@ -68,10 +69,22 @@ while running:
             
             cell_size = min(width, height - 150) // grid_size
             
-        elif event.type == pygame.MOUSEBUTTONDOWN: # Clic
+        elif event.type == pygame.MOUSEBUTTONDOWN: # Clics
             for value, button in buttons:
                 if button.collidepoint(event.pos):
-                    if value == "EASY":
+                    if value == "SOLO":
+                        mode = "SOLO"
+                        game_state = "MENU2"
+                        
+                    elif value == "ONE-BOARD MULTI":
+                        mode = "MULTI1"
+                        game_state = "MENU2"
+                        
+                    elif value == "TWO-BOARD MULTI":
+                        mode = "MULTI2"
+                        game_state = "MENU2"
+                        
+                    elif value == "EASY":
                         selected_grid_size, move_interval, max_food, food_interval, game_state, difficulty = game.game_setup(settings.EASY)
                         
                     elif value == "NORMAL":
@@ -86,10 +99,11 @@ while running:
                     elif value == "TRY AGAIN":
                         selected_grid_size, move_interval, max_food, food_interval, game_state, difficulty = game.game_setup(difficulty)
                         
-                    elif value == "RETURN TO MENU":
+                    elif value == "RETURN TO MENU" or value == "RETURN":
                         game_state = "MENU"
                         best_score = 0
-                            
+                    
+                    # New Game
                     grid_size = selected_grid_size 
                     cell_size = min(width, height - 150) // grid_size                   
                     ingame_snake, head, direction, next_direction, grow, food_pos, score, move_timer, free_cases, food_interval = game.new_game(
@@ -99,16 +113,39 @@ while running:
                         difficulty
                     )
 
+    # Principal Menu
     if game_state == "MENU":
+        
         # Set screen color
         screen.fill(settings.BACKGROUND_COLOR)
         
-        buttons = menu.draw_menu(screen, width, height)
+        # Draw Difficulty Menu
+        buttons = menu.draw_menu(screen, width, height, settings.MENU)
         
+        # Grid Size and Cell Size Check
         grid_size = selected_grid_size
         cell_size = min(width, height - 150) // grid_size
-                
+    
+    # Difficulty Menu
+    elif game_state == "MENU2":
+        
+        # Set screen color
+        screen.fill(settings.BACKGROUND_COLOR)
+        
+        # Draw Difficulty Menu
+        if len(buttons) > len(settings.DIFFICULT):
+            buttons.pop()
+            
+        buttons = menu.draw_menu(screen, width, height, settings.DIFFICULT)
+        buttons.appendleft(menu.draw_return(screen, width, height))
+        
+        # Grid Size and Cell Size Check
+        grid_size = selected_grid_size
+        cell_size = min(width, height - 150) // grid_size
+    
+    # In Game
     elif game_state == "GAME":
+        
         # Set screen color
         screen.fill(settings.BACKGROUND_COLOR)
     
@@ -118,7 +155,8 @@ while running:
 
         # Draw Grid
         grid.draw_grid(screen, grid_size, cell_size, grid_offset_x, grid_offset_y)
-            
+        
+        # Moving Interval
         move_timer += dt
         head = ingame_snake[0]
 
@@ -131,6 +169,7 @@ while running:
                 grow
             )
 
+            # Eat food
             if head in food_pos:
                 score += 1
                 grow = True
@@ -143,16 +182,20 @@ while running:
                             food_pos, 
                             head
                         )
+                        
+                # Food Downgrade
                 if free_cases <= food_interval:
                     max_food -= 1
                     food_interval = (max_food - 1) * difficulty["food_interval"]
                     food_pos.pop()
                     if free_cases <= 0:
                         game_state = "WIN"
-                
+        
+        # Best Score
         if score > best_score:
             best_score = score
-                
+        
+        # Draw Score
         game.draw_score(screen, score, best_score, width, height)
     
         head = ingame_snake[0]
@@ -169,6 +212,7 @@ while running:
         for item in food_pos:
             food.draw_food(screen, item, grid_offset_x, grid_offset_y, cell_size)
 
+        # Draw Snake
         for snake_case in ingame_snake:
             if (
                 head[0] >= 0 
@@ -176,9 +220,11 @@ while running:
                 and head[1] >= 0 
                 and head[1] < grid_size
             ):
-                snake.draw_snake(screen, snake_case, grid_offset_x, grid_offset_y, cell_size) # Draw Snake
-        
+                snake.draw_snake(screen, snake_case, grid_offset_x, grid_offset_y, cell_size)
+    
+    # Pause
     elif game_state == "PAUSE":
+        
         # Set screen color
         screen.fill(settings.BACKGROUND_COLOR)
         
@@ -196,21 +242,28 @@ while running:
         # Draw Snake
         for snake_case in ingame_snake:
             snake.draw_snake(screen, snake_case, grid_offset_x, grid_offset_y, cell_size)
-            
+        
+        # Draw Score
         game.draw_score(screen, score, best_score, width, height)
-            
+        
+        # Print PAUSED
         menu.print_game_result(screen, "PAUSED", width, height)
         
     elif game_state == "GAME_OVER":
+        
         # Set screen color
         screen.fill(settings.BACKGROUND_COLOR)
         
+        # Print GAME OVER
         menu.print_game_result(screen, "GAME OVER", width, height)
         
+        # Draw Score
         game.draw_score(screen, score, best_score, width, height)
         
+        # Buttons
         buttons = menu.draw_game_over(screen, width, height)
         
+        # Grid Size and Cell Size Check
         grid_size = selected_grid_size
         cell_size = min(width, height - 150) // grid_size
         
@@ -218,12 +271,16 @@ while running:
         # Set screen color
         screen.fill(settings.BACKGROUND_COLOR)
         
+        # Print YOU WIN
         menu.print_game_result(screen, "YOU WIN", width, height)
         
+        # Draw Score
         game.draw_score(screen, score, best_score, width, height)
         
+        # Buttons
         buttons = menu.draw_game_over(screen, width, height)
         
+        # Grid Size and Cell Size Check
         grid_size = selected_grid_size
         cell_size = min(width, height - 150) // grid_size
         
