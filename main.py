@@ -34,8 +34,7 @@ buttons = menu.draw_menu(screen, width, height, settings.MENU)
 
 # Grid
 selected_grid_size = difficulty["grid_size"]
-grid_size = selected_grid_size
-cell_size = min(width, height - 150) // grid_size
+grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
 
 # Food
 max_food = difficulty["max_food"]
@@ -104,8 +103,7 @@ while running:
                         best_score = 0
                     
                     # New Game
-                    grid_size = selected_grid_size 
-                    cell_size = min(width, height - 150) // grid_size                   
+                    grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)                   
                     ingame_snake, head, direction, next_direction, grow, food_pos, score, move_timer, free_cases, food_interval = game.new_game(
                         selected_grid_size, 
                         max_food, 
@@ -123,8 +121,7 @@ while running:
         buttons = menu.draw_menu(screen, width, height, settings.MENU)
         
         # Grid Size and Cell Size Check
-        grid_size = selected_grid_size
-        cell_size = min(width, height - 150) // grid_size
+        grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
     
     # Difficulty Menu
     elif game_state == "MENU2":
@@ -132,16 +129,12 @@ while running:
         # Set screen color
         screen.fill(settings.BACKGROUND_COLOR)
         
-        # Draw Difficulty Menu
-        if len(buttons) > len(settings.DIFFICULT):
-            buttons.pop()
-            
+        # Draw Difficulty Menu   
         buttons = menu.draw_menu(screen, width, height, settings.DIFFICULT)
         buttons.appendleft(menu.draw_return(screen, width, height))
         
         # Grid Size and Cell Size Check
-        grid_size = selected_grid_size
-        cell_size = min(width, height - 150) // grid_size
+        grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
     
     # In Game
     elif game_state == "GAME":
@@ -150,8 +143,7 @@ while running:
         screen.fill(settings.BACKGROUND_COLOR)
     
         # Offsets
-        grid_offset_x = (width - grid_size * cell_size) / 2
-        grid_offset_y = 100 + (((height - 150) - grid_size * cell_size) / 2)
+        grid_offset_x, grid_offset_y = game.offsetts_check(width, height, grid_size, cell_size)
 
         # Draw Grid
         grid.draw_grid(screen, grid_size, cell_size, grid_offset_x, grid_offset_y)
@@ -174,6 +166,7 @@ while running:
                 score += 1
                 grow = True
                 free_cases = game.free_case_check(grid_size, ingame_snake, max_food, head)
+                
                 for i, item in enumerate(food_pos):
                     if item == head:
                         food_pos[i] = food.generate_food(
@@ -188,6 +181,7 @@ while running:
                     max_food -= 1
                     food_interval = (max_food - 1) * difficulty["food_interval"]
                     food_pos.pop()
+                    
                     if free_cases <= 0:
                         game_state = "WIN"
         
@@ -229,8 +223,7 @@ while running:
         screen.fill(settings.BACKGROUND_COLOR)
         
         # Offsets
-        grid_offset_x = (width - grid_size * cell_size) / 2
-        grid_offset_y = 100 + (((height - 150) - grid_size * cell_size) / 2)
+        grid_offset_x, grid_offset_y = game.offsetts_check(width, height, grid_size, cell_size)
         
         # Draw Grid
         grid.draw_grid(screen, grid_size, cell_size, grid_offset_x, grid_offset_y)
@@ -264,8 +257,7 @@ while running:
         buttons = menu.draw_game_over(screen, width, height)
         
         # Grid Size and Cell Size Check
-        grid_size = selected_grid_size
-        cell_size = min(width, height - 150) // grid_size
+        grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
         
     elif game_state == "WIN":
         # Set screen color
@@ -281,8 +273,7 @@ while running:
         buttons = menu.draw_game_over(screen, width, height)
         
         # Grid Size and Cell Size Check
-        grid_size = selected_grid_size
-        cell_size = min(width, height - 150) // grid_size
+        grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
         
     # Print
     pygame.display.flip()

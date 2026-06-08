@@ -1,7 +1,22 @@
 import pygame
 from collections import deque
 
-import settings    
+import settings
+
+def get_scale(width, height):
+    
+    dw = width / settings.DEFAULT_WIDTH
+    dh = height / settings.DEFAULT_HEIGHT
+    
+    return dw, dh
+
+def create_font(font_size, dh):
+    
+    base_font_size = max(3, int(font_size * dh))
+    item_font = pygame.font.Font(None, base_font_size)
+    hover_font = pygame.font.Font(None, int(base_font_size * 1.1))
+    
+    return item_font, hover_font
 
 def draw_menu(screen, width, height, states):
     
@@ -11,16 +26,13 @@ def draw_menu(screen, width, height, states):
     
     states_len = len(states)
     
-    dw = width / settings.DEFAULT_WIDTH
-    dh = height / settings.DEFAULT_HEIGHT
+    dw, dh = get_scale(width, height)
         
     button_width = max(100, int(settings.DEFAULT_BUTTON_WIDTH * dw))
     button_height = max(25, int(settings.DEFAULT_BUTTON_HEIGHT * dh))
     button_offset = max(3, int(settings.DEFAULT_BUTTON_MARGE * dh))
     
-    base_font_size = max(3, int(settings.DEFAULT_MENU_FONT * dh))
-    menu_font = pygame.font.Font(None, base_font_size)
-    hover_font = pygame.font.Font(None, int(base_font_size * 1.1))
+    menu_font, hover_font = create_font(settings.DEFAULT_MENU_FONT, dh)
     
     menu_width = button_width
     menu_height = (
@@ -87,18 +99,15 @@ def draw_game_over(screen, width, height):
     
     buttons = deque([])
     
-    dw = width / settings.DEFAULT_WIDTH
-    dh = height / settings.DEFAULT_HEIGHT
+    dw, dh = get_scale(width, height)
     
-    button_width = max(50, int(settings.DEFAULT_BUTTON_WIDTH / 1.5 * dw))
-    button_height = max(12, int(settings.DEFAULT_BUTTON_HEIGHT / 1.5 * dh))
-    button_offset = max(3, int(settings.DEFAULT_BUTTON_MARGE * 4 * dh))
+    button_width = max(settings.DEFAULT_BUTTON3_MIN_WIDTH, int(settings.DEFAULT_BUTTON3_WIDTH * dw))
+    button_height = max(settings.DEFAULT_BUTTON3_MIN_HEIGHT, int(settings.DEFAULT_BUTTON3_HEIGHT * dh))
+    button_offset = max(settings.DEFAULT_BUTTON3_MIN_MARGE, int(settings.DEFAULT_BUTTON3_MARGE * dh))
+    
+    menu_font, hover_font = create_font(settings.DEFAULT_GAME_OVER_FONT, dh)
     
     button_pos = int(width / (len(settings.GAME_OVER) + 1))
-    
-    base_font_size = max(3, int(settings.DEFAULT_GAME_OVER_FONT * dh))
-    menu_font = pygame.font.Font(None, base_font_size)
-    hover_font = pygame.font.Font(None, int(base_font_size * 1.1))
     
     x = int(button_pos - (button_width / 2))
     y = height - (button_offset + button_height)
@@ -156,8 +165,8 @@ def print_game_result(screen, game_result, width, height):
     
     dh = height / settings.DEFAULT_HEIGHT
     
-    button_height = max(12, int(settings.DEFAULT_BUTTON_HEIGHT / 1.5 * dh))
-    button_offset = max(3, int(settings.DEFAULT_BUTTON_MARGE * 4 * dh))
+    button_height = max(12, int(settings.DEFAULT_BUTTON3_HEIGHT * dh))
+    button_offset = max(5, int(settings.DEFAULT_BUTTON3_MARGE * dh))
     
     y = button_offset + button_height
     
@@ -180,18 +189,15 @@ def draw_return(screen, width, height):
     
     mouse_pos = pygame.mouse.get_pos()
     
-    dw = width / settings.DEFAULT_WIDTH
-    dh = height / settings.DEFAULT_HEIGHT
+    dw, dh = get_scale(width, height)
     
-    button_width = max(50, int(settings.DEFAULT_BUTTON2_WIDTH / 1.5 * dw))
-    button_height = max(12, int(settings.DEFAULT_BUTTON2_HEIGHT / 1.5 * dh))
+    button_width = max(settings.DEFAULT_BUTTON2_MIN_WIDTH, int(settings.DEFAULT_BUTTON2_WIDTH * dw))
+    button_height = max(settings.DEFAULT_BUTTON2_MIN_HEIGHT, int(settings.DEFAULT_BUTTON2_HEIGHT * dh))
     
-    base_font_size = max(3, int(settings.DEFAULT_GAME_OVER_FONT * dh))
-    menu_font = pygame.font.Font(None, base_font_size)
-    hover_font = pygame.font.Font(None, int(base_font_size * 1.1))
+    menu_font, hover_font = create_font(settings.DEFAULT_RETURN_FONT, dh)
     
-    x = width - ((40 * dw) + button_width)
-    y = height - ((20 * dh) + button_height)
+    x = width - ((50 * dw) + button_width)
+    y = height - ((30 * dh) + button_height)
     
     button_rect = pygame.Rect(
         x, 

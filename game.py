@@ -4,6 +4,21 @@ import pygame
 import snake
 import food
 import settings
+import menu
+
+def cell_size_check(selected_grid_size, width, height):
+    
+    grid_size = selected_grid_size
+    cell_size = min(width, height - 150) // grid_size
+    
+    return grid_size, cell_size
+
+def offsetts_check(width, height, grid_size, cell_size):
+    
+    grid_offset_x = (width - grid_size * cell_size) / 2
+    grid_offset_y = 100 + (((height - 150) - grid_size * cell_size) / 2)
+    
+    return grid_offset_x, grid_offset_y
 
 def free_case_check(grid_size, ingame_snake, max_food, head):
     
@@ -94,11 +109,10 @@ def game_setup(difficulty):
 
 def draw_score(screen, score, best_score, width, height):
     
-    dw = width / settings.DEFAULT_WIDTH
-    dh = height / settings.DEFAULT_HEIGHT
+    dw, dh = menu.get_scale(width, height)
     
-    score_width = max(25, int(settings.DEFAULT_BUTTON_WIDTH / 2.5 * dw))
-    score_height = max(6, int(settings.DEFAULT_BUTTON_HEIGHT / 2.5 * dh))
+    score_width = max(settings.DEFAULT_SCORE_MIN_WIDTH, int(settings.DEFAULT_SCORE_WIDTH * dw))
+    score_height = max(settings.DEFAULT_SCORE_MIN_HEIGHT, int(settings.DEFAULT_SCORE_HEIGHT * dh))
     
     base_font_size = max(3, int(settings.DEFAULT_SCORE_FONT * dh))
     score_font = pygame.font.Font(None, base_font_size)
