@@ -3,7 +3,7 @@ import random
 
 import settings
 
-def generate_food(grid_size, snake, food_pos, head): # Plusieurs food ? En fonction des cases restantes ?
+def generate_food(grid_size, snake, food_pos, head):
     
     possible_food_pos = [
         [i, j]

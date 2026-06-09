@@ -5,6 +5,7 @@ import snake
 import food
 import settings
 import menu
+import grid
 
 def cell_size_check(selected_grid_size, width, height):
     
@@ -60,6 +61,20 @@ def new_game(grid_size, max_food, food_interval, difficulty):
     
     return ingame_snake, head, direction, next_direction, grow, food_pos, score, move_timer, free_cases, food_interval
 
+def new_extra_game(grid_size, ingame_snake, food_pos, head, max_obstacles, max_powerup, difficulty):
+    
+    obstacles_pos = []
+    for _ in range(max_obstacles):
+        obstacles_pos.append(grid.generate_obstacles(grid_size, ingame_snake, food_pos, obstacles_pos, head))
+    
+    powerup_pos = []
+    for _ in range(max_powerup):
+        powerup_pos.append(None)
+    
+    powerup_interval = (max_powerup - 1) * difficulty["power_up_interval"] if max_powerup > 1 else 1
+    
+    return obstacles_pos, powerup_pos, powerup_interval
+
 def turn(next_direction, ingame_snake, grow):
     
     direction = next_direction
@@ -74,9 +89,7 @@ def turn(next_direction, ingame_snake, grow):
             
     return direction, ingame_snake, grow, head
 
-def grid_out_check(head, grid_size, ingame_snake):
-    
-    head = ingame_snake[0]
+def grid_out_check(head, grid_size):
     
     if (
         head[0] < 0 
@@ -89,10 +102,15 @@ def grid_out_check(head, grid_size, ingame_snake):
     return False
 
 def eat_que_check(ingame_snake, head):
-    
-    head = ingame_snake[0]
 
     if head in list(ingame_snake)[1:]:
+        return True
+    
+    return False
+
+def hit_obstacles_check(head, obstacles_pos):
+    
+    if head in obstacles_pos:
         return True
     
     return False
@@ -106,6 +124,14 @@ def game_setup(difficulty):
     game_state = "GAME"
     
     return selected_grid_size, move_interval, max_food, food_interval, game_state, difficulty
+
+def extra_game_setup(difficulty):
+    
+    max_obstacles = difficulty["max_obstacles"]
+    max_powerup = difficulty["max_power_up"]
+    powerup_interval = difficulty["power_up_interval"]
+    
+    return max_obstacles, max_powerup, powerup_interval
 
 def draw_score(screen, score, best_score, width, height):
     

@@ -28,9 +28,9 @@ def draw_menu(screen, width, height, states):
     
     dw, dh = get_scale(width, height)
         
-    button_width = max(100, int(settings.DEFAULT_BUTTON_WIDTH * dw))
-    button_height = max(25, int(settings.DEFAULT_BUTTON_HEIGHT * dh))
-    button_offset = max(3, int(settings.DEFAULT_BUTTON_MARGE * dh))
+    button_width = max(settings.DEFAULT_BUTTON_MIN_WIDTH, int(settings.DEFAULT_BUTTON_WIDTH * dw))
+    button_height = max(settings.DEFAULT_BUTTON_MIN_HEIGHT, int(settings.DEFAULT_BUTTON_HEIGHT * dh))
+    button_offset = max(settings.DEFAULT_BUTTON_MIN_MARGE, int(settings.DEFAULT_BUTTON_MARGE * dh))
     
     menu_font, hover_font = create_font(settings.DEFAULT_MENU_FONT, dh)
     
@@ -42,7 +42,7 @@ def draw_menu(screen, width, height, states):
     offset = button_height + button_offset
     
     x = (width - menu_width) // 2
-    y = 125 + ((height - menu_height) // 2)
+    y = settings.DEFAULT_TITLE_MARGE + (((height - settings.DEFAULT_TITLE_MARGE) - menu_height) // 2)
         
     for button_text in states:
         
@@ -185,19 +185,29 @@ def print_game_result(screen, game_result, width, height):
     
     screen.blit(text_surface, text_rect)
     
-def draw_return(screen, width, height):
+def draw_return(screen, width, height, states):
     
     mouse_pos = pygame.mouse.get_pos()
+    
+    states_len = len(states)
     
     dw, dh = get_scale(width, height)
     
     button_width = max(settings.DEFAULT_BUTTON2_MIN_WIDTH, int(settings.DEFAULT_BUTTON2_WIDTH * dw))
     button_height = max(settings.DEFAULT_BUTTON2_MIN_HEIGHT, int(settings.DEFAULT_BUTTON2_HEIGHT * dh))
     
+    menu_height = max(settings.DEFAULT_BUTTON_MIN_HEIGHT, int(settings.DEFAULT_BUTTON_HEIGHT * dh))
+    menu_offset = max(settings.DEFAULT_BUTTON_MIN_MARGE, int(settings.DEFAULT_BUTTON_MARGE * dh))
+    
     menu_font, hover_font = create_font(settings.DEFAULT_RETURN_FONT, dh)
     
-    x = width - ((50 * dw) + button_width)
-    y = height - ((30 * dh) + button_height)
+    menu_height = (
+        (states_len * menu_height)
+        + ((states_len - 1) * menu_offset)
+    )
+    
+    x = width - ((60 * dw) + button_width)
+    y = height - (((height - settings.DEFAULT_TITLE_MARGE) - menu_height) // 2) - button_height
     
     button_rect = pygame.Rect(
         x, 

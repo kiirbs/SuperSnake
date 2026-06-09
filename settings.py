@@ -1,5 +1,7 @@
 DEFAULT_GRID_SIZE = 20
 
+DEFAULT_TITLE_MARGE = 200
+
 DEFAULT_BUTTON_WIDTH = 550
 DEFAULT_BUTTON_HEIGHT = 80
 DEFAULT_BUTTON_MARGE = 20
@@ -61,28 +63,40 @@ EASY = {
     "grid_size": 10,
     "move_interval": 0.4,
     "max_food": 3,
-    "food_interval": 33
+    "food_interval": 33,
+    "max_obstacles": 25,
+    "max_power_up": 1,
+    "power_up_interval": 0
 }
 
 NORMAL = {
     "grid_size": 20,
     "move_interval": 0.3,
     "max_food": 4,
-    "food_interval": 100
+    "food_interval": 100,
+    "max_obstacles": 100,
+    "max_power_up": 2,
+    "power_up_interval": 100
 }
 
 HARD = {
     "grid_size": 30,
     "move_interval": 0.2,
     "max_food": 5,
-    "food_interval": 180
+    "food_interval": 180,
+    "max_obstacles": 225,
+    "max_power_up": 3,
+    "power_up_interval": 300
 }
 
 ULTRA_HARD = {
     "grid_size": 40,
     "move_interval": 0.1,
-    "max_food": 6,
-    "food_interval": 200
+    "max_food": 8,
+    "food_interval": 200,
+    "max_obstacles": 400,
+    "max_power_up": 4,
+    "power_up_interval": 400
 }
 
 BACKGROUND_COLOR = (58, 58, 58)
@@ -94,5 +108,6 @@ MENU_HOVER_COLOR = (40, 40, 40)
 TEXT_COLOR = (255, 255, 255)
 TEXT_HOVER_COLOR = (255, 255, 0)
 SCORE_COLOR = (0, 0, 0)
+OBSTACLES_COLOR = (5, 2, 3)
 
 FPS = 60

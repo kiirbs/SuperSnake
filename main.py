@@ -20,6 +20,8 @@ dt = 0
 
 # Setup
 game_state = "MENU"
+mode = "SOLO"
+extra_mode = False
 best_score = 0
 difficulty = settings.NORMAL
 move_interval = difficulty["move_interval"]
@@ -85,18 +87,28 @@ while running:
                         
                     elif value == "EASY":
                         selected_grid_size, move_interval, max_food, food_interval, game_state, difficulty = game.game_setup(settings.EASY)
+                        if extra_mode:
+                            max_obstacles, max_powerup, powerup_interval = game.extra_game_setup(settings.EASY)
                         
                     elif value == "NORMAL":
                         selected_grid_size, move_interval, max_food, food_interval, game_state, difficulty = game.game_setup(settings.NORMAL)
+                        if extra_mode:
+                            max_obstacles, max_powerup, powerup_interval = game.extra_game_setup(settings.NORMAL)
                         
                     elif value == "HARD":
                         selected_grid_size, move_interval, max_food, food_interval, game_state, difficulty = game.game_setup(settings.HARD)
+                        if extra_mode:
+                            max_obstacles, max_powerup, powerup_interval = game.extra_game_setup(settings.HARD)
                         
                     elif value == "ULTRA HARD":
                         selected_grid_size, move_interval, max_food, food_interval, game_state, difficulty = game.game_setup(settings.ULTRA_HARD)
+                        if extra_mode:
+                            max_obstacles, max_powerup, powerup_interval = game.extra_game_setup(settings.ULTRA_HARD)
                         
                     elif value == "TRY AGAIN":
                         selected_grid_size, move_interval, max_food, food_interval, game_state, difficulty = game.game_setup(difficulty)
+                        if extra_mode:
+                            max_obstacles, max_powerup, powerup_interval = game.extra_game_setup(difficulty)
                         
                     elif value == "RETURN TO MENU" or value == "RETURN":
                         game_state = "MENU"
@@ -110,6 +122,16 @@ while running:
                         food_interval,
                         difficulty
                     )
+                    if extra_mode:
+                        obstacles_pos, powerup_pos, powerup_interval = game.new_extra_game(
+                            grid_size, 
+                            ingame_snake, 
+                            food_pos, 
+                            head,
+                            max_obstacles, 
+                            max_powerup, 
+                            difficulty
+                        )
 
     # Principal Menu
     if game_state == "MENU":
@@ -131,7 +153,7 @@ while running:
         
         # Draw Difficulty Menu   
         buttons = menu.draw_menu(screen, width, height, settings.DIFFICULT)
-        buttons.appendleft(menu.draw_return(screen, width, height))
+        buttons.appendleft(menu.draw_return(screen, width, height, settings.DIFFICULT))
         
         # Grid Size and Cell Size Check
         grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
@@ -195,12 +217,17 @@ while running:
         head = ingame_snake[0]
     
         # Grid-Out Check
-        if game.grid_out_check(head, grid_size, ingame_snake):
+        if game.grid_out_check(head, grid_size):
             game_state = "GAME_OVER"
         
         # Que-Eating Check
         if game.eat_que_check(ingame_snake, head):
             game_state = "GAME_OVER"
+        
+        # Hit-Obstacles Check
+        if extra_mode:
+            if game.hit_obstacles_check(head, obstacles_pos):
+                game_state = "GAME_OVER"
 
         # Draw Food
         for item in food_pos:
@@ -215,6 +242,11 @@ while running:
                 and head[1] < grid_size
             ):
                 snake.draw_snake(screen, snake_case, grid_offset_x, grid_offset_y, cell_size)
+                
+        # Draw Obstacles
+        if extra_mode:
+            for item in obstacles_pos:
+                grid.draw_obstacles(screen, item, grid_offset_x, grid_offset_y, cell_size)
     
     # Pause
     elif game_state == "PAUSE":
