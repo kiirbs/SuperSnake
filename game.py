@@ -43,10 +43,13 @@ def new_game(grid_size, max_food, food_interval, difficulty):
     next_direction = direction
     grow = False
     
+    # Obstacles
+    obstacles_pos = []
+    
     # Food
     food_pos = []
     for _ in range(max_food):
-        food_pos.append(food.generate_food(grid_size, ingame_snake, food_pos, head))
+        food_pos.append(food.generate_food(grid_size, ingame_snake, food_pos, obstacles_pos, head))
         
     food_interval = (max_food - 1) * difficulty["food_interval"]
         
@@ -59,7 +62,7 @@ def new_game(grid_size, max_food, food_interval, difficulty):
     # Free Cases
     free_cases = free_case_check(grid_size, ingame_snake, max_food, head)
     
-    return ingame_snake, head, direction, next_direction, grow, food_pos, score, move_timer, free_cases, food_interval
+    return ingame_snake, head, direction, next_direction, grow, food_pos, score, move_timer, free_cases, food_interval, obstacles_pos
 
 def new_extra_game(grid_size, ingame_snake, food_pos, head, max_obstacles, max_powerup, difficulty):
     

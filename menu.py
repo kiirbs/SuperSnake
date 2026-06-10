@@ -185,7 +185,7 @@ def print_game_result(screen, game_result, width, height):
     
     screen.blit(text_surface, text_rect)
     
-def draw_return(screen, width, height, states):
+def draw_second_menu(screen, buttons, extra_mode, width, height, states):
     
     mouse_pos = pygame.mouse.get_pos()
     
@@ -206,48 +206,102 @@ def draw_return(screen, width, height, states):
         + ((states_len - 1) * menu_offset)
     )
     
-    x = width - ((60 * dw) + button_width)
+    return_x = width - ((60 * dw) + button_width)
+    extra_x = 60 * dw
     y = height - (((height - settings.DEFAULT_TITLE_MARGE) - menu_height) // 2) - button_height
     
-    button_rect = pygame.Rect(
-        x, 
+    return_rect = pygame.Rect(
+        return_x, 
         y,
         button_width, 
         button_height
     )
     
-    if button_rect.collidepoint(mouse_pos):
-        color = settings.MENU_HOVER_COLOR
-        text_color = settings.TEXT_HOVER_COLOR
-        font = hover_font
+    extra_rect = pygame.Rect(
+        extra_x,
+        y,
+        button_width,
+        button_height
+    )
+    
+    if return_rect.collidepoint(mouse_pos):
+        return_color = settings.MENU_HOVER_COLOR
+        return_text_color = settings.TEXT_HOVER_COLOR
+        return_font = hover_font
                         
-        button_rect = pygame.Rect(
-            x - 5,
+        return_rect = pygame.Rect(
+            return_x - 5,
             y - 5,
             button_width + 10,
             button_height + 10
         )
     else:
-        color = settings.MENU_COLOR
-        text_color = settings.TEXT_COLOR
-        font = menu_font
+        return_color = settings.MENU_COLOR
+        return_text_color = settings.TEXT_COLOR
+        return_font = menu_font
         
-    text_surface = font.render(
+    if extra_rect.collidepoint(mouse_pos):
+        extra_color = settings.MENU_HOVER_COLOR
+        extra_text_color = settings.TEXT_HOVER_COLOR
+        extra_font = hover_font
+                        
+        extra_rect = pygame.Rect(
+            extra_x - 5,
+            y - 5,
+            button_width + 10,
+            button_height + 10
+        )
+    else:
+        if extra_mode:
+            extra_text_color = settings.TEXT_HOVER_COLOR
+        else:
+            extra_text_color = settings.TEXT_COLOR
+            
+        extra_color = settings.MENU_COLOR
+        extra_font = menu_font
+        
+    if extra_mode:
+        extra_text = "EXTRAS : ON"
+    else:
+        extra_text = "EXTRAS : OFF"
+        
+    return_text_surface = return_font.render(
         "RETURN",
         True,
-        text_color
+        return_text_color
+    )
+    
+    extra_text_surface = extra_font.render(
+        extra_text,
+        True,
+        extra_text_color
     )
         
     pygame.draw.rect(
         screen,
-        color,
-        button_rect,
+        return_color,
+        return_rect,
     )
-        
-    text_rect = text_surface.get_rect(
-        center=button_rect.center
-    )
-        
-    screen.blit(text_surface, text_rect)
     
-    return ("RETURN", button_rect)
+    pygame.draw.rect(
+        screen,
+        extra_color,
+        extra_rect,
+    )
+        
+    return_text_rect = return_text_surface.get_rect(
+        center=return_rect.center
+    )
+    
+    extra_text_rect = extra_text_surface.get_rect(
+        center=extra_rect.center
+    )
+        
+    screen.blit(return_text_surface, return_text_rect)
+    
+    screen.blit(extra_text_surface, extra_text_rect)
+    
+    buttons.append(("RETURN", return_rect))
+    buttons.append(("EXTRA", extra_rect))
+    
+    return buttons

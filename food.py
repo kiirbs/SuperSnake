@@ -3,13 +3,13 @@ import random
 
 import settings
 
-def generate_food(grid_size, snake, food_pos, head):
+def generate_food(grid_size, snake, food_pos, obstacles_pos, head):
     
     possible_food_pos = [
         [i, j]
         for i in range(grid_size) 
         for j in range(grid_size)
-        if [i, j] not in snake and [i, j] not in food_pos and [i, j] != head
+        if [i, j] not in snake and [i, j] not in food_pos and [i, j] not in obstacles_pos and [i, j] != head
     ]
     
     if not possible_food_pos:

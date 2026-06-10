@@ -26,6 +26,9 @@ best_score = 0
 difficulty = settings.NORMAL
 move_interval = difficulty["move_interval"]
 direction = None
+max_obstacles = difficulty["max_obstacles"]
+max_powerup = difficulty["max_power_up"]
+powerup_interval = difficulty["power_up_interval"]
 
 width = screen.get_width()
 height = screen.get_height()
@@ -113,10 +116,13 @@ while running:
                     elif value == "RETURN TO MENU" or value == "RETURN":
                         game_state = "MENU"
                         best_score = 0
+                        
+                    elif value == "EXTRA":
+                        extra_mode = True if extra_mode == False else False
                     
                     # New Game
                     grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)                   
-                    ingame_snake, head, direction, next_direction, grow, food_pos, score, move_timer, free_cases, food_interval = game.new_game(
+                    ingame_snake, head, direction, next_direction, grow, food_pos, score, move_timer, free_cases, food_interval, obstacles_pos = game.new_game(
                         selected_grid_size, 
                         max_food, 
                         food_interval,
@@ -153,7 +159,7 @@ while running:
         
         # Draw Difficulty Menu   
         buttons = menu.draw_menu(screen, width, height, settings.DIFFICULT)
-        buttons.appendleft(menu.draw_return(screen, width, height, settings.DIFFICULT))
+        buttons = menu.draw_second_menu(screen, buttons, extra_mode, width, height, settings.DIFFICULT)
         
         # Grid Size and Cell Size Check
         grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
@@ -194,7 +200,8 @@ while running:
                         food_pos[i] = food.generate_food(
                             grid_size, 
                             ingame_snake,
-                            food_pos, 
+                            food_pos,
+                            obstacles_pos,
                             head
                         )
                         
