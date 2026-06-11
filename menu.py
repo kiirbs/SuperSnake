@@ -1,6 +1,7 @@
 import pygame
 from collections import deque
 
+import game
 import settings
 
 def get_scale(width, height):
@@ -46,36 +47,21 @@ def draw_menu(screen, width, height, states):
         
     for button_text in states:
         
-        button_rect = pygame.Rect(
-            x, 
-            y,
-            button_width, 
-            button_height
-        )
+        button_rect = game.create_rect(x, y, button_width, button_height)
                 
         if button_rect.collidepoint(mouse_pos):
             color = settings.MENU_HOVER_COLOR
             text_color = settings.TEXT_HOVER_COLOR
             font = hover_font
-                        
-            button_rect = pygame.Rect(
-                x - 5,
-                y - 5,
-                button_width + 10,
-                button_height + 10
-            )
+                 
+            button_rect = game.create_rect(x - 5, y - 5, button_width + 10, button_height + 10)
+            
         else:
             color = settings.MENU_COLOR
             text_color = settings.TEXT_COLOR
             font = menu_font
         
         buttons.append((button_text, button_rect))
-
-        text_surface = font.render(
-            button_text,
-            True,
-            text_color
-        )
         
         pygame.draw.rect(
             screen,
@@ -83,9 +69,7 @@ def draw_menu(screen, width, height, states):
             button_rect,
         )
         
-        text_rect = text_surface.get_rect(
-            center=button_rect.center
-        )
+        text_surface, text_rect = game.create_text(font, button_text, text_color, button_rect)
         
         screen.blit(text_surface, text_rect)
         
@@ -114,36 +98,21 @@ def draw_game_over(screen, width, height):
     
     for button_text in settings.GAME_OVER:
         
-        button_rect = pygame.Rect(
-            x, 
-            y,
-            button_width, 
-            button_height
-        )
+        button_rect = game.create_rect(x, y, button_width, button_height)
         
         if button_rect.collidepoint(mouse_pos):
             color = settings.MENU_HOVER_COLOR
             text_color = settings.TEXT_HOVER_COLOR
             font = hover_font
                         
-            button_rect = pygame.Rect(
-                x - 5,
-                y - 5,
-                button_width + 10,
-                button_height + 10
-            )
+            button_rect = game.create_rect(x - 5, y - 5, button_width + 10, button_height + 10)
+            
         else:
             color = settings.MENU_COLOR
             text_color = settings.TEXT_COLOR
             font = menu_font
             
         buttons.append((button_text, button_rect))
-
-        text_surface = font.render(
-            button_text,
-            True,
-            text_color
-        )
         
         pygame.draw.rect(
             screen,
@@ -151,9 +120,7 @@ def draw_game_over(screen, width, height):
             button_rect,
         )
         
-        text_rect = text_surface.get_rect(
-            center=button_rect.center
-        )
+        text_surface, text_rect = game.create_text(font, button_text, text_color, button_rect)
         
         screen.blit(text_surface, text_rect)
         
@@ -210,31 +177,16 @@ def draw_second_menu(screen, buttons, extra_mode, width, height, states):
     extra_x = 60 * dw
     y = height - (((height - settings.DEFAULT_TITLE_MARGE) - menu_height) // 2) - button_height
     
-    return_rect = pygame.Rect(
-        return_x, 
-        y,
-        button_width, 
-        button_height
-    )
-    
-    extra_rect = pygame.Rect(
-        extra_x,
-        y,
-        button_width,
-        button_height
-    )
+    return_rect = game.create_rect(return_x, y, button_width, button_height)
+    extra_rect = game.create_rect(extra_x, y, button_width, button_height)
     
     if return_rect.collidepoint(mouse_pos):
         return_color = settings.MENU_HOVER_COLOR
         return_text_color = settings.TEXT_HOVER_COLOR
         return_font = hover_font
                         
-        return_rect = pygame.Rect(
-            return_x - 5,
-            y - 5,
-            button_width + 10,
-            button_height + 10
-        )
+        return_rect = game.create_rect(return_x - 5, y - 5, button_width + 10, button_height + 10)
+        
     else:
         return_color = settings.MENU_COLOR
         return_text_color = settings.TEXT_COLOR
@@ -245,12 +197,8 @@ def draw_second_menu(screen, buttons, extra_mode, width, height, states):
         extra_text_color = settings.TEXT_HOVER_COLOR
         extra_font = hover_font
                         
-        extra_rect = pygame.Rect(
-            extra_x - 5,
-            y - 5,
-            button_width + 10,
-            button_height + 10
-        )
+        extra_rect = game.create_rect(extra_x - 5, y - 5, button_width + 10, button_height + 10)
+        
     else:
         if extra_mode:
             extra_text_color = settings.TEXT_HOVER_COLOR
@@ -265,40 +213,21 @@ def draw_second_menu(screen, buttons, extra_mode, width, height, states):
     else:
         extra_text = "EXTRAS : OFF"
         
-    return_text_surface = return_font.render(
-        "RETURN",
-        True,
-        return_text_color
-    )
-    
-    extra_text_surface = extra_font.render(
-        extra_text,
-        True,
-        extra_text_color
-    )
-        
     pygame.draw.rect(
         screen,
         return_color,
         return_rect,
     )
-    
     pygame.draw.rect(
         screen,
         extra_color,
         extra_rect,
     )
-        
-    return_text_rect = return_text_surface.get_rect(
-        center=return_rect.center
-    )
     
-    extra_text_rect = extra_text_surface.get_rect(
-        center=extra_rect.center
-    )
+    return_text_surface, return_text_rect = game.create_text(return_font, "RETURN", return_text_color, return_rect)
+    extra_text_surface, extra_text_rect = game.create_text(extra_font, extra_text, extra_text_color, extra_rect)
         
     screen.blit(return_text_surface, return_text_rect)
-    
     screen.blit(extra_text_surface, extra_text_rect)
     
     buttons.append(("RETURN", return_rect))

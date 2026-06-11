@@ -136,6 +136,31 @@ def extra_game_setup(difficulty):
     
     return max_obstacles, max_powerup, powerup_interval
 
+def create_rect(x, y, width, height):
+    
+    rect = pygame.Rect(
+            x, 
+            y,
+            width, 
+            height
+        )
+    
+    return rect
+
+def create_text(font, text, color, rect):
+    
+    text_surface = font.render(
+        text,
+        True,
+        color
+    )
+    
+    text_rect = text_surface.get_rect(
+        center=rect.center
+    )
+    
+    return text_surface, text_rect
+
 def draw_score(screen, score, best_score, width, height):
     
     dw, dh = menu.get_scale(width, height)
@@ -146,52 +171,32 @@ def draw_score(screen, score, best_score, width, height):
     base_font_size = max(3, int(settings.DEFAULT_SCORE_FONT * dh))
     score_font = pygame.font.Font(None, base_font_size)
     
-    score_rect = pygame.Rect(
-        int(40 * dw), 
-        int((30 * dh) + score_height),
-        score_width,
-        score_height
-    )
-    
-    best_score_rect = pygame.Rect(
-        int(40 * dw), 
-        int(20 * dh),
-        score_width,
-        score_height
-    )
-    
-    score_text_surface = score_font.render(
-        f"SCORE : {score}",
-        True,
-        settings.TEXT_COLOR
-    )
-    
-    best_score_text_surface = score_font.render(
-        f"BEST : {best_score}",
-        True,
-        settings.TEXT_COLOR
-    )
+    score_rect = create_rect(int(40 * dw), int((30 * dh) + score_height), score_width, score_height)
+    best_score_rect = create_rect(int(40 * dw), int(20 * dh), score_width, score_height)
         
     pygame.draw.rect(
         screen,
         settings.SCORE_COLOR,
         score_rect,
     )
-    
     pygame.draw.rect(
         screen,
         settings.SCORE_COLOR,
         best_score_rect,
     )
-        
-    score_text_rect = score_text_surface.get_rect(
-        center=score_rect.center
-    )
     
-    best_score_text_rect = best_score_text_surface.get_rect(
-        center=best_score_rect.center
+    score_text_surface, score_text_rect = create_text(
+        score_font, 
+        f"SCORE : {score}", 
+        settings.TEXT_COLOR, 
+        score_rect
+    )
+    best_score_text_surface, best_score_text_rect = create_text(
+        score_font, 
+        f"BEST : {best_score}", 
+        settings.TEXT_COLOR, 
+        best_score_rect
     )
         
     screen.blit(score_text_surface, score_text_rect)
-    
     screen.blit(best_score_text_surface, best_score_text_rect)
