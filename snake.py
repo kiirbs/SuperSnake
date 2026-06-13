@@ -27,6 +27,7 @@ def draw_snake(screen, snake, grid_offset_x, grid_offset_y, cell_size):
     )
     
 def add_snake_case(direction, snake, grow):
+    
     if direction == "UP":
         snake.appendleft([snake[0][0], snake[0][1] - 1])
     elif direction == "DOWN":

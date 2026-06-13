@@ -30,6 +30,9 @@ max_obstacles = difficulty["max_obstacles"]
 max_powerup = difficulty["max_power_up"]
 powerup_interval = difficulty["power_up_interval"]
 
+speed_end_timer = 0
+bonus_grow = False
+
 width = screen.get_width()
 height = screen.get_height()
 
@@ -122,12 +125,13 @@ while running:
                     
                     # New Game
                     grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)                   
-                    ingame_snake, head, direction, next_direction, grow, food_pos, score, speed_limit, move_timer, free_cases, food_interval, obstacles_pos = game.new_game(
+                    ingame_snake, head, direction, next_direction, grow, food_pos, score, speed_limit, move_timer, free_cases, food_interval, obstacles_pos, powerup_pos = game.new_game(
                         selected_grid_size, 
                         max_food, 
                         food_interval,
                         difficulty
                     )
+                    old_move_interval = 0
                     if extra_mode:
                         obstacles_pos, powerup_pos, powerup_interval = game.new_extra_game(
                             grid_size, 
@@ -179,10 +183,24 @@ while running:
         # Moving Interval
         move_timer += dt
         head = ingame_snake[0]
+        
+        if speed_end_timer > 0:
+            speed_end_timer -= dt
+            
+            if speed_end_timer <= 0:
+                move_interval = old_move_interval
 
         # Turn
         if move_timer >= move_interval:
             move_timer = 0
+            
+            if bonus_grow:
+                grow = True
+                bonus_timer -= 1
+                
+                if bonus_timer <= 0:
+                    bonus_grow = False
+                    
             direction, ingame_snake, grow, head = game.turn(
                 next_direction,
                 ingame_snake,
@@ -194,11 +212,10 @@ while running:
                 score += 1
                 grow = True
                 free_cases = game.free_case_check(grid_size, ingame_snake, max_food, head)
+                move_interval, speed_limit = game.speed_adjustment(score, speed_limit, move_interval)
+                old_move_interval = move_interval
                 
-                while score >= speed_limit:
-                    move_interval *= 0.98
-                    speed_limit += 5
-                
+                # Generate Food
                 for i, item in enumerate(food_pos):
                     if item == head:
                         food_pos[i] = food.generate_food(
@@ -217,6 +234,97 @@ while running:
                     
                     if free_cases <= 0:
                         game_state = "WIN"
+            
+            # Eat Power Up
+            for powerup in powerup_pos:
+                
+                if powerup is None:
+                    continue
+                    
+                if head == powerup["pos"]:
+                    free_cases = game.free_case_check(grid_size, ingame_snake, max_food, head)
+                    
+                    if powerup["type"] == "POISON":
+                        score -= 1
+                        ingame_snake.pop()
+                        
+                        if len(ingame_snake) <= 0 or score < 0:
+                            game_state = "GAME_OVER"
+                            
+                        powerup_pos, max_powerup, powerup_interval = game.reset_powerup(
+                            head, 
+                            ingame_snake, 
+                            food_pos, 
+                            powerup_pos,
+                            powerup_interval, 
+                            obstacles_pos, 
+                            grid_size, 
+                            difficulty, 
+                            free_cases, 
+                            max_powerup
+                        )
+                            
+                    elif powerup["type"] == "SPEED":
+                        score += 1
+                        grow = True
+                        speed_end_timer = 5
+                        old_move_interval = move_interval
+                        move_interval *= 0.75
+                        
+                        move_interval, speed_limit = game.speed_adjustment(score, speed_limit, move_interval)
+                        old_move_interval = move_interval
+                        powerup_pos, max_powerup, powerup_interval = game.reset_powerup(
+                            head, 
+                            ingame_snake, 
+                            food_pos, 
+                            powerup_pos, 
+                            powerup_interval,
+                            obstacles_pos, 
+                            grid_size, 
+                            difficulty, 
+                            free_cases, 
+                            max_powerup
+                        )       
+                        
+                    elif powerup["type"] == "SCORE":
+                        score += 5
+                        grow = True
+                        
+                        move_interval, speed_limit = game.speed_adjustment(score, speed_limit, move_interval)
+                        old_move_interval = move_interval
+                        powerup_pos, max_powerup, powerup_interval = game.reset_powerup(
+                            head, 
+                            ingame_snake, 
+                            food_pos, 
+                            powerup_pos, 
+                            powerup_interval,
+                            obstacles_pos, 
+                            grid_size, 
+                            difficulty, 
+                            free_cases, 
+                            max_powerup
+                        )
+                        
+                    elif powerup["type"] == "BONUS":
+                        score += 1
+                        grow = True
+                        bonus_grow = True
+                        bonus_timer = 5
+                        
+                        move_interval, speed_limit = game.speed_adjustment(score, speed_limit, move_interval)
+                        old_move_interval = move_interval
+                        powerup_pos, max_powerup, powerup_interval = game.reset_powerup(
+                            head, 
+                            ingame_snake, 
+                            food_pos, 
+                            powerup_pos, 
+                            powerup_interval,
+                            obstacles_pos, 
+                            grid_size, 
+                            difficulty, 
+                            free_cases, 
+                            max_powerup
+                        )
         
         # Best Score
         if score > best_score:
@@ -224,8 +332,9 @@ while running:
         
         # Draw Score
         game.draw_score(screen, score, best_score, width, height)
-    
-        head = ingame_snake[0]
+        
+        if len(ingame_snake) > 0:
+            head = ingame_snake[0]
     
         # Grid-Out Check
         if game.grid_out_check(head, grid_size):
@@ -256,8 +365,17 @@ while running:
                 
         # Draw Obstacles
         if extra_mode:
+            
             for item in obstacles_pos:
+                
                 grid.draw_obstacles(screen, item, grid_offset_x, grid_offset_y, cell_size)
+                
+            for powerup in powerup_pos:
+                
+                if powerup is None:
+                    continue
+                
+                food.draw_powerup(screen, powerup["pos"], powerup["type"], grid_offset_x, grid_offset_y, cell_size)
     
     # Pause
     elif game_state == "PAUSE":
@@ -284,6 +402,20 @@ while running:
         
         # Print PAUSED
         menu.print_game_result(screen, "PAUSED", width, height)
+        
+        # Draw Obstacles
+        if extra_mode:
+            
+            for item in obstacles_pos:
+                
+                grid.draw_obstacles(screen, item, grid_offset_x, grid_offset_y, cell_size)
+                
+            for powerup in powerup_pos:
+                
+                if powerup is None:
+                    continue
+                
+                food.draw_powerup(screen, powerup["pos"], powerup["type"], grid_offset_x, grid_offset_y, cell_size)
         
     elif game_state == "GAME_OVER":
         

@@ -34,6 +34,14 @@ def free_case_check(grid_size, ingame_snake, max_food, head):
         
     return grid_len - snake_len - max_food
 
+def speed_adjustment(score, speed_limit, move_interval):
+    
+    while score >= speed_limit:
+        move_interval *= 0.98
+        speed_limit += 5
+        
+    return move_interval, speed_limit
+
 def new_game(grid_size, max_food, food_interval, difficulty):
     
     # Snake
@@ -45,6 +53,9 @@ def new_game(grid_size, max_food, food_interval, difficulty):
     
     # Obstacles
     obstacles_pos = []
+    
+    # Power Up
+    powerup_pos = []
     
     # Food
     food_pos = []
@@ -63,17 +74,15 @@ def new_game(grid_size, max_food, food_interval, difficulty):
     # Free Cases
     free_cases = free_case_check(grid_size, ingame_snake, max_food, head)
     
-    return ingame_snake, head, direction, next_direction, grow, food_pos, score, speed_limit, move_timer, free_cases, food_interval, obstacles_pos
+    return ingame_snake, head, direction, next_direction, grow, food_pos, score, speed_limit, move_timer, free_cases, food_interval, obstacles_pos, powerup_pos
 
 def new_extra_game(grid_size, ingame_snake, food_pos, head, max_obstacles, max_powerup, difficulty):
     
     powerup_pos = []
-    for _ in range(max_powerup):
-        powerup_pos.append(None)
+    obstacles_pos = []
     
     max_obstacle_len = grid_size // 4
     possible_direction = ["UP", "LEFT", "DOWN", "RIGHT"]
-    obstacles_pos = []
     
     for _ in range(max_obstacles):
         
@@ -107,6 +116,16 @@ def new_extra_game(grid_size, ingame_snake, food_pos, head, max_obstacles, max_p
             
             obstacle = next_obstacle
             obstacles_pos.append(obstacle)
+            
+    for _ in range(max_powerup):
+        powerup_pos.append(food.generate_powerup(
+            grid_size, 
+            ingame_snake, 
+            food_pos, 
+            powerup_pos, 
+            obstacles_pos, 
+            head
+        ))
                 
     powerup_interval = (max_powerup - 1) * difficulty["power_up_interval"] if max_powerup > 1 else 1
     
@@ -125,6 +144,28 @@ def turn(next_direction, ingame_snake, grow):
     head = ingame_snake[0]
             
     return direction, ingame_snake, grow, head
+
+def reset_powerup(head, ingame_snake, food_pos, powerup_pos, powerup_interval, obstacles_pos, grid_size, difficulty, free_cases, max_powerup):
+    
+    # Generate Powerup
+    for i, item in enumerate(powerup_pos):
+        if item["pos"] == head:
+            powerup_pos[i] = food.generate_powerup(
+                grid_size, 
+                ingame_snake,
+                food_pos,
+                powerup_pos,
+                obstacles_pos,
+                head
+            )
+                        
+    # Powerup Downgrade
+    if free_cases <= powerup_interval:
+        max_powerup -= 1
+        powerup_interval = (max_powerup - 1) * difficulty["power_up_interval"] if max_powerup > 1 else 1
+        powerup_pos.pop()
+        
+    return powerup_pos, max_powerup, powerup_interval
 
 def grid_out_check(head, grid_size):
     
