@@ -68,7 +68,7 @@ EASY = {
     "move_interval": 0.4,
     "max_food": 3,
     "food_interval": 33,
-    "max_obstacles": 22,
+    "max_obstacles": 5,
     "max_power_up": 1,
     "power_up_interval": 0
 }
@@ -78,7 +78,7 @@ NORMAL = {
     "move_interval": 0.3,
     "max_food": 4,
     "food_interval": 100,
-    "max_obstacles": 45,
+    "max_obstacles": 7,
     "max_power_up": 2,
     "power_up_interval": 100
 }
@@ -88,17 +88,17 @@ HARD = {
     "move_interval": 0.2,
     "max_food": 5,
     "food_interval": 180,
-    "max_obstacles": 70,
+    "max_obstacles": 10,
     "max_power_up": 3,
     "power_up_interval": 300
 }
 
 ULTRA_HARD = {
     "grid_size": 40,
-    "move_interval": 0.1,
+    "move_interval": 0.15,
     "max_food": 8,
     "food_interval": 200,
-    "max_obstacles": 100,
+    "max_obstacles": 15,
     "max_power_up": 4,
     "power_up_interval": 400
 }

@@ -66,14 +66,47 @@ def new_game(grid_size, max_food, food_interval, difficulty):
 
 def new_extra_game(grid_size, ingame_snake, food_pos, head, max_obstacles, max_powerup, difficulty):
     
-    obstacles_pos = []
-    for _ in range(max_obstacles):
-        obstacles_pos.append(grid.generate_obstacles(grid_size, ingame_snake, food_pos, obstacles_pos, head))
-    
     powerup_pos = []
     for _ in range(max_powerup):
         powerup_pos.append(None)
     
+    max_obstacle_len = grid_size // 4
+    possible_direction = ["UP", "LEFT", "DOWN", "RIGHT"]
+    obstacles_pos = []
+    
+    for _ in range(max_obstacles):
+        
+        obstacle_len = random.randint(1, max_obstacle_len)
+        obstacle = grid.generate_obstacles(grid_size, ingame_snake, food_pos, obstacles_pos, head)
+        obstacles_pos.append(obstacle)
+        direction = random.choice(possible_direction)
+        
+        for _ in range(obstacle_len):
+            
+            if direction == "UP":
+                next_obstacle = [obstacle[0], obstacle[1] - 1]
+            if direction == "LEFT":
+                next_obstacle = [obstacle[0] - 1, obstacle[1]]
+            if direction == "DOWN":
+                next_obstacle = [obstacle[0], obstacle[1] + 1]
+            if direction == "RIGHT":
+                next_obstacle = [obstacle[0] + 1, obstacle[1]]
+                
+            if (next_obstacle[0] < 0 
+                or next_obstacle[0] >= grid_size 
+                or next_obstacle[1] < 0 
+                or next_obstacle[1] >= grid_size
+                or next_obstacle in ingame_snake 
+                or next_obstacle in food_pos 
+                or next_obstacle in powerup_pos 
+                or next_obstacle in obstacles_pos
+                or next_obstacle == head
+            ):
+                break
+            
+            obstacle = next_obstacle
+            obstacles_pos.append(obstacle)
+                
     powerup_interval = (max_powerup - 1) * difficulty["power_up_interval"] if max_powerup > 1 else 1
     
     return obstacles_pos, powerup_pos, powerup_interval
