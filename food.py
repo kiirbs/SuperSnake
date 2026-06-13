@@ -32,3 +32,22 @@ def draw_food(screen, food_pos, grid_offset_x, grid_offset_y, cell_size):
                 cell_size - 2
             )
         )
+    
+def generate_powerup(grid_size, snake, food_pos, powerup_pos, obstacles_pos, head):
+    
+    possible_powerup_pos = [
+        [i, j]
+        for i in range(grid_size) 
+        for j in range(grid_size)
+        if ([i, j] not in snake 
+            and [i, j] not in food_pos 
+            and [i, j] not in obstacles_pos 
+            and [i, j] not in powerup_pos 
+            and [i, j] != head
+        )
+    ]
+    
+    if not possible_powerup_pos:
+        return None
+    
+    return random.choice(possible_powerup_pos)

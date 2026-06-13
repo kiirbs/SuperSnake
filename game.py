@@ -55,6 +55,7 @@ def new_game(grid_size, max_food, food_interval, difficulty):
         
     # Score
     score = 0
+    speed_limit = 5
     
     # Auto-move
     move_timer = 0
@@ -62,7 +63,7 @@ def new_game(grid_size, max_food, food_interval, difficulty):
     # Free Cases
     free_cases = free_case_check(grid_size, ingame_snake, max_food, head)
     
-    return ingame_snake, head, direction, next_direction, grow, food_pos, score, move_timer, free_cases, food_interval, obstacles_pos
+    return ingame_snake, head, direction, next_direction, grow, food_pos, score, speed_limit, move_timer, free_cases, food_interval, obstacles_pos
 
 def new_extra_game(grid_size, ingame_snake, food_pos, head, max_obstacles, max_powerup, difficulty):
     

@@ -122,7 +122,7 @@ while running:
                     
                     # New Game
                     grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)                   
-                    ingame_snake, head, direction, next_direction, grow, food_pos, score, move_timer, free_cases, food_interval, obstacles_pos = game.new_game(
+                    ingame_snake, head, direction, next_direction, grow, food_pos, score, speed_limit, move_timer, free_cases, food_interval, obstacles_pos = game.new_game(
                         selected_grid_size, 
                         max_food, 
                         food_interval,
@@ -194,6 +194,10 @@ while running:
                 score += 1
                 grow = True
                 free_cases = game.free_case_check(grid_size, ingame_snake, max_food, head)
+                
+                while score >= speed_limit:
+                    move_interval *= 0.98
+                    speed_limit += 5
                 
                 for i, item in enumerate(food_pos):
                     if item == head:
