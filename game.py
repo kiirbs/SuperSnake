@@ -34,13 +34,14 @@ def free_case_check(grid_size, ingame_snake, max_food, head):
         
     return grid_len - snake_len - max_food
 
-def speed_adjustment(score, speed_limit, move_interval):
+def speed_adjustment(score, speed_limit, move_interval, old_move_interval):
     
     while score >= speed_limit:
         move_interval *= 0.98
+        old_move_interval *= 0.98
         speed_limit += 5
         
-    return move_interval, speed_limit
+    return move_interval, old_move_interval, speed_limit
 
 def new_game(grid_size, max_food, food_interval, difficulty):
     

@@ -212,8 +212,7 @@ while running:
                 score += 1
                 grow = True
                 free_cases = game.free_case_check(grid_size, ingame_snake, max_food, head)
-                move_interval, speed_limit = game.speed_adjustment(score, speed_limit, move_interval)
-                old_move_interval = move_interval
+                move_interval, old_move_interval, speed_limit = game.speed_adjustment(score, speed_limit, move_interval, old_move_interval)
                 
                 # Generate Food
                 for i, item in enumerate(food_pos):
@@ -271,8 +270,7 @@ while running:
                         old_move_interval = move_interval
                         move_interval *= 0.75
                         
-                        move_interval, speed_limit = game.speed_adjustment(score, speed_limit, move_interval)
-                        old_move_interval = move_interval
+                        move_interval, old_move_interval, speed_limit = game.speed_adjustment(score, speed_limit, move_interval, old_move_interval)
                         powerup_pos, max_powerup, powerup_interval = game.reset_powerup(
                             head, 
                             ingame_snake, 
@@ -290,8 +288,7 @@ while running:
                         score += 5
                         grow = True
                         
-                        move_interval, speed_limit = game.speed_adjustment(score, speed_limit, move_interval)
-                        old_move_interval = move_interval
+                        move_interval, old_move_interval, speed_limit = game.speed_adjustment(score, speed_limit, move_interval, old_move_interval)
                         powerup_pos, max_powerup, powerup_interval = game.reset_powerup(
                             head, 
                             ingame_snake, 
@@ -311,8 +308,7 @@ while running:
                         bonus_grow = True
                         bonus_timer = 5
                         
-                        move_interval, speed_limit = game.speed_adjustment(score, speed_limit, move_interval)
-                        old_move_interval = move_interval
+                        move_interval, old_move_interval, speed_limit = game.speed_adjustment(score, speed_limit, move_interval, old_move_interval)
                         powerup_pos, max_powerup, powerup_interval = game.reset_powerup(
                             head, 
                             ingame_snake, 
