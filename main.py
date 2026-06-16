@@ -132,6 +132,9 @@ while running:
                         difficulty
                     )
                     old_move_interval = 0
+                    speed_end_timer = 0
+                    bonus_grow = False
+                    bonus_timer = 0
                     if extra_mode:
                         obstacles_pos, powerup_pos, powerup_interval = game.new_extra_game(
                             grid_size, 
@@ -266,9 +269,13 @@ while running:
                     elif powerup["type"] == "SPEED":
                         score += 1
                         grow = True
-                        speed_end_timer = 5
-                        old_move_interval = move_interval
-                        move_interval *= 0.75
+                        
+                        if speed_end_timer <= 0:
+                            old_move_interval = move_interval
+                            move_interval *= 0.75
+                            speed_end_timer = 5
+                        else:
+                            speed_end_timer = 5
                         
                         move_interval, old_move_interval, speed_limit = game.speed_adjustment(score, speed_limit, move_interval, old_move_interval)
                         powerup_pos, max_powerup, powerup_interval = game.reset_powerup(
@@ -359,13 +366,14 @@ while running:
             ):
                 snake.draw_snake(screen, snake_case, grid_offset_x, grid_offset_y, cell_size)
                 
-        # Draw Obstacles
         if extra_mode:
             
+            # Draw Obstacles
             for item in obstacles_pos:
                 
                 grid.draw_obstacles(screen, item, grid_offset_x, grid_offset_y, cell_size)
                 
+            # Draw Power Up
             for powerup in powerup_pos:
                 
                 if powerup is None:
@@ -393,25 +401,25 @@ while running:
         for snake_case in ingame_snake:
             snake.draw_snake(screen, snake_case, grid_offset_x, grid_offset_y, cell_size)
         
-        # Draw Score
-        game.draw_score(screen, score, best_score, width, height)
-        
-        # Print PAUSED
-        menu.print_game_result(screen, "PAUSED", width, height)
-        
-        # Draw Obstacles
         if extra_mode:
             
+            # Draw Obstacles
             for item in obstacles_pos:
-                
                 grid.draw_obstacles(screen, item, grid_offset_x, grid_offset_y, cell_size)
                 
+            # Draw Power Up
             for powerup in powerup_pos:
                 
                 if powerup is None:
                     continue
                 
                 food.draw_powerup(screen, powerup["pos"], powerup["type"], grid_offset_x, grid_offset_y, cell_size)
+                
+        # Draw Score
+        game.draw_score(screen, score, best_score, width, height)
+        
+        # Print PAUSED
+        menu.print_game_result(screen, "PAUSED", width, height)
         
     elif game_state == "GAME_OVER":
         

@@ -22,9 +22,9 @@ First python project, remaster snake.
 
 - [X] Plus de nourriture
 - [X] Bouttons interactifs
-- [ ] Vitesse progressive
-- [ ] Obstacles
-- [ ] Power-ups
+- [X] Vitesse progressive
+- [X] Obstacles
+- [X] Power-ups
 - [ ] Effets visuels
 - [ ] Sons
 
