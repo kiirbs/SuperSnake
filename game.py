@@ -237,7 +237,7 @@ def create_text(font, text, color, rect):
     
     return text_surface, text_rect
 
-def draw_score(screen, score, best_score, width, height):
+def draw_score(screen, score, best_score, speed, snake_len, width, height):
     
     dw, dh = menu.get_scale(width, height)
     
@@ -249,6 +249,8 @@ def draw_score(screen, score, best_score, width, height):
     
     score_rect = create_rect(int(40 * dw), int((30 * dh) + score_height), score_width, score_height)
     best_score_rect = create_rect(int(40 * dw), int(20 * dh), score_width, score_height)
+    speed_rect = create_rect(int(40 * dw), int((40 * dh) + score_height * 2), score_width, score_height)
+    snake_len_rect = create_rect(int(40 * dw), int((50 * dh) + score_height * 3), score_width, score_height)
         
     pygame.draw.rect(
         screen,
@@ -259,6 +261,16 @@ def draw_score(screen, score, best_score, width, height):
         screen,
         settings.SCORE_COLOR,
         best_score_rect,
+    )
+    pygame.draw.rect(
+        screen,
+        settings.SCORE_COLOR,
+        speed_rect,
+    )
+    pygame.draw.rect(
+        screen,
+        settings.SCORE_COLOR,
+        snake_len_rect,
     )
     
     score_text_surface, score_text_rect = create_text(
@@ -273,6 +285,21 @@ def draw_score(screen, score, best_score, width, height):
         settings.TEXT_COLOR, 
         best_score_rect
     )
+    speed_text_surface, speed_text_rect = create_text(
+        score_font, 
+        f"SPEED : {speed}C/S", 
+        settings.TEXT_COLOR, 
+        speed_rect
+    )
+    snake_len_text_surface, snake_len_text_rect = create_text(
+        score_font, 
+        f"LENGHT : {snake_len}", 
+        settings.TEXT_COLOR, 
+        snake_len_rect
+    )
         
     screen.blit(score_text_surface, score_text_rect)
     screen.blit(best_score_text_surface, best_score_text_rect)
+    screen.blit(speed_text_surface, speed_text_rect)
+    screen.blit(snake_len_text_surface, snake_len_text_rect)
+    

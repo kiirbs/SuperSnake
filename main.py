@@ -333,8 +333,12 @@ while running:
         if score > best_score:
             best_score = score
         
-        # Draw Score
-        game.draw_score(screen, score, best_score, width, height)
+        # Speed & Len  
+        speed = round(1 / move_interval, 1)
+        snake_len = len(ingame_snake)
+        
+        # Draw Score & Speed & Len
+        game.draw_score(screen, score, best_score, speed, snake_len, width, height)
         
         if len(ingame_snake) > 0:
             head = ingame_snake[0]
@@ -416,7 +420,7 @@ while running:
                 food.draw_powerup(screen, powerup["pos"], powerup["type"], grid_offset_x, grid_offset_y, cell_size)
                 
         # Draw Score
-        game.draw_score(screen, score, best_score, width, height)
+        game.draw_score(screen, score, best_score, speed, snake_len, width, height)
         
         # Print PAUSED
         menu.print_game_result(screen, "PAUSED", width, height)
@@ -430,7 +434,7 @@ while running:
         menu.print_game_result(screen, "GAME OVER", width, height)
         
         # Draw Score
-        game.draw_score(screen, score, best_score, width, height)
+        game.draw_score(screen, score, best_score, speed, snake_len, width, height)
         
         # Buttons
         buttons = menu.draw_game_over(screen, width, height)
