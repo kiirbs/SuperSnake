@@ -287,7 +287,7 @@ def draw_score(screen, score, best_score, speed, snake_len, width, height):
     )
     speed_text_surface, speed_text_rect = create_text(
         score_font, 
-        f"SPEED : {speed}C/S", 
+        f"SPEED : {speed} C/S", 
         settings.TEXT_COLOR, 
         speed_rect
     )

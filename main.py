@@ -7,6 +7,7 @@ import snake
 import game
 import grid
 import menu
+import save
 
 # Pygame Setup
 pygame.init()
@@ -24,11 +25,13 @@ mode = "SOLO"
 extra_mode = False
 best_score = 0
 difficulty = settings.NORMAL
+difficulty_name = difficulty["name"]
 move_interval = difficulty["move_interval"]
 direction = None
 max_obstacles = difficulty["max_obstacles"]
 max_powerup = difficulty["max_power_up"]
 powerup_interval = difficulty["power_up_interval"]
+highscores = save.load_highscores()
 
 speed_end_timer = 0
 bonus_grow = False
@@ -131,6 +134,7 @@ while running:
                         food_interval,
                         difficulty
                     )
+                    difficulty_name = difficulty["name"]
                     old_move_interval = 0
                     speed_end_timer = 0
                     bonus_grow = False
@@ -330,8 +334,13 @@ while running:
                         )
         
         # Best Score
-        if score > best_score:
-            best_score = score
+        
+        mode2 = "EXTRA" if extra_mode else "CLASSIC"
+        
+        if score > highscores[mode2][difficulty_name]:
+            highscores[mode2][difficulty_name] = score
+        
+        best_score = highscores[mode2][difficulty_name]
         
         # Speed & Len  
         speed = round(1 / move_interval, 1)
@@ -430,6 +439,9 @@ while running:
         # Set screen color
         screen.fill(settings.BACKGROUND_COLOR)
         
+        #if score > highscores[mode2][difficulty_name]:
+        save.save_highscores(highscores)
+        
         # Print GAME OVER
         menu.print_game_result(screen, "GAME OVER", width, height)
         
@@ -445,6 +457,9 @@ while running:
     elif game_state == "WIN":
         # Set screen color
         screen.fill(settings.BACKGROUND_COLOR)
+        
+        #if score > highscores[mode2][difficulty_name]:
+        save.save_highscores(highscores)
         
         # Print YOU WIN
         menu.print_game_result(screen, "YOU WIN", width, height)

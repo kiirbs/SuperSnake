@@ -64,6 +64,7 @@ GAME_OVER = [
 
 # Difficulties
 EASY = {
+    "name": "EASY",
     "grid_size": 10,
     "move_interval": 0.4,
     "max_food": 3,
@@ -74,6 +75,7 @@ EASY = {
 }
 
 NORMAL = {
+    "name": "NORMAL",
     "grid_size": 20,
     "move_interval": 0.3,
     "max_food": 4,
@@ -84,6 +86,7 @@ NORMAL = {
 }
 
 HARD = {
+    "name": "HARD",
     "grid_size": 30,
     "move_interval": 0.2,
     "max_food": 5,
@@ -94,6 +97,7 @@ HARD = {
 }
 
 ULTRA_HARD = {
+    "name": "ULTRA_HARD",
     "grid_size": 40,
     "move_interval": 0.15,
     "max_food": 8,
