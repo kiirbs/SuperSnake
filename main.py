@@ -8,9 +8,11 @@ import game
 import grid
 import menu
 import save
+import audio
 
 # Pygame Setup
 pygame.init()
+pygame.mixer.init()
 screen = pygame.display.set_mode(
     (settings.DEFAULT_WIDTH, settings.DEFAULT_HEIGHT),
     pygame.RESIZABLE
@@ -82,6 +84,7 @@ while running:
         elif event.type == pygame.MOUSEBUTTONDOWN: # Clics
             for value, button in buttons:
                 if button.collidepoint(event.pos):
+                    audio.CLICK_SOUND.play()
                     if value == "SOLO":
                         mode = "SOLO"
                         game_state = "MENU2"
@@ -220,6 +223,7 @@ while running:
                 grow = True
                 free_cases = game.free_case_check(grid_size, ingame_snake, max_food, head)
                 move_interval, old_move_interval, speed_limit = game.speed_adjustment(score, speed_limit, move_interval, old_move_interval)
+                audio.FOOD_SOUND.play()
                 
                 # Generate Food
                 for i, item in enumerate(food_pos):
@@ -240,6 +244,7 @@ while running:
                     
                     if free_cases <= 0:
                         game_state = "WIN"
+                        audio.WIN_SOUND.play()
             
             # Eat Power Up
             for powerup in powerup_pos:
@@ -253,9 +258,11 @@ while running:
                     if powerup["type"] == "POISON":
                         score -= 1
                         ingame_snake.pop()
+                        audio.POISON_SOUND.play()
                         
                         if len(ingame_snake) <= 0 or score < 0:
                             game_state = "GAME_OVER"
+                            audio.LOSE_SOUND.play()
                             
                         powerup_pos, max_powerup, powerup_interval = game.reset_powerup(
                             head, 
@@ -273,6 +280,7 @@ while running:
                     elif powerup["type"] == "SPEED":
                         score += 1
                         grow = True
+                        audio.POWERUP_SOUND.play()
                         
                         if speed_end_timer <= 0:
                             old_move_interval = move_interval
@@ -298,6 +306,7 @@ while running:
                     elif powerup["type"] == "SCORE":
                         score += 5
                         grow = True
+                        audio.POWERUP_SOUND.play()
                         
                         move_interval, old_move_interval, speed_limit = game.speed_adjustment(score, speed_limit, move_interval, old_move_interval)
                         powerup_pos, max_powerup, powerup_interval = game.reset_powerup(
@@ -318,6 +327,7 @@ while running:
                         grow = True
                         bonus_grow = True
                         bonus_timer = 5
+                        audio.POWERUP_SOUND.play()
                         
                         move_interval, old_move_interval, speed_limit = game.speed_adjustment(score, speed_limit, move_interval, old_move_interval)
                         powerup_pos, max_powerup, powerup_interval = game.reset_powerup(
@@ -355,15 +365,18 @@ while running:
         # Grid-Out Check
         if game.grid_out_check(head, grid_size):
             game_state = "GAME_OVER"
+            audio.LOSE_SOUND.play()
         
         # Que-Eating Check
         if game.eat_que_check(ingame_snake, head):
             game_state = "GAME_OVER"
+            audio.LOSE_SOUND.play()
         
         # Hit-Obstacles Check
         if extra_mode:
             if game.hit_obstacles_check(head, obstacles_pos):
                 game_state = "GAME_OVER"
+                audio.LOSE_SOUND.play()
 
         # Draw Food
         for item in food_pos:
