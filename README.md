@@ -15,7 +15,8 @@ First python project, remaster snake.
 - [X] Game Over
 - [X] Menu principal
 - [X] Difficultés
-- [ ] Multi
+- [X] One Board Multi
+- [ ] Two Board Multi
 - [ ] Bot
 
 ## Améliorations
@@ -26,5 +27,7 @@ First python project, remaster snake.
 - [X] Obstacles
 - [X] Power-ups
 - [ ] Effets visuels
-- [ ] Sons
+- [X] Sons
+- [ ] Plus d'effets visuels
+- [ ] Plus de sons
 

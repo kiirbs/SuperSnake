@@ -131,7 +131,7 @@ while running:
                     # New Game
                     grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
                     difficulty_name = difficulty["name"]                
-                    players, food_pos, free_cases, food_interval, obstacles_pos, powerup_pos = game.new_game(
+                    players, food_pos, free_cases, food_interval, obstacles_pos, powerup_pos, winner = game.new_game(
                         selected_grid_size, 
                         max_food, 
                         food_interval,
@@ -185,7 +185,8 @@ while running:
         # Moving Interval
         for p in players:
             p["move_timer"] += dt
-            p["head"] = p["snake"][0]
+            if p["snake_len"] > 0:
+                p["head"] = p["snake"][0]
             p["speed_end_timer"], p["move_interval"] = game.speed_timer(
                 p["speed_end_timer"],
                 p["move_interval"],
@@ -195,7 +196,8 @@ while running:
 
         # Move
         for p in players:
-            game.move(p)
+            if p["snake_len"] > 0:
+                game.move(p)
 
         # Eat food
         for p in players:
@@ -225,7 +227,8 @@ while running:
                 max_food, 
                 powerup_pos, 
                 max_powerup, 
-                powerup_interval
+                powerup_interval,
+                mode
             )
         
         # Best Score Check
@@ -247,7 +250,7 @@ while running:
                 players[1]["snake"]
             ) 
         for p in players:
-            if game.grid_out_check(p["head"], grid_size) or game.eat_que_check(p["snake"], p["head"]):
+            if game.grid_out_check(p["head"], grid_size) or game.eat_que_check(p["snake"], p["head"]) or p["snake_len"] <= 0:
                 if mode == "SOLO":
                     game_state = "GAME_OVER"
                     audio.LOSE_SOUND.play()

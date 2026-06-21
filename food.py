@@ -131,7 +131,7 @@ def eat_food_check(player, players, grid_size, difficulty, game_state, obstacles
                         
     return food_pos, max_food, food_interval, game_state
 
-def eat_powerup_check(player, players, grid_size, difficulty, game_state, obstacles_pos, food_pos, max_food, powerup_pos, max_powerup, powerup_interval):
+def eat_powerup_check(player, players, grid_size, difficulty, game_state, obstacles_pos, food_pos, max_food, powerup_pos, max_powerup, powerup_interval, mode):
     
     winner = None
     
@@ -149,11 +149,15 @@ def eat_powerup_check(player, players, grid_size, difficulty, game_state, obstac
                 audio.POISON_SOUND.play()
                         
                 if len(player["snake"]) <= 0 or player["score"] < 0:
-                    if player["name"] == "player_1":
-                        game_state, winner = "PLAYER_WIN", "P2"
+                    if mode == "SOLO":
+                        game_state = "GAME_OVER"
+                        audio.LOSE_SOUND.play()
                     else:
-                        game_state, winner = "PLAYER_WIN", "P1"
-                    audio.WIN_SOUND.play()
+                        if player["name"] == "player_1":
+                            game_state, winner = "PLAYER_WIN", "P2"
+                        else:
+                            game_state, winner = "PLAYER_WIN", "P1"
+                        audio.WIN_SOUND.play()
                             
                 powerup_pos, max_powerup, powerup_interval = game.reset_powerup(
                     players,

@@ -142,7 +142,10 @@ def new_game(grid_size, max_food, food_interval, difficulty, mode):
     # Free Cases
     free_cases = free_case_check(grid_size, max_food, players)
     
-    return players, food_pos, free_cases, food_interval, obstacles_pos, powerup_pos
+    # Winner
+    winner = None
+    
+    return players, food_pos, free_cases, food_interval, obstacles_pos, powerup_pos, winner
 
 def new_extra_game(grid_size, food_pos, max_obstacles, max_powerup, difficulty, players):
     
