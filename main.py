@@ -28,15 +28,12 @@ extra_mode = False
 best_score = 0
 difficulty = settings.NORMAL
 difficulty_name = difficulty["name"]
-move_interval = difficulty["move_interval"]
-direction = None
 max_obstacles = difficulty["max_obstacles"]
 max_powerup = difficulty["max_power_up"]
 powerup_interval = difficulty["power_up_interval"]
 highscores = save.load_highscores()
-
-speed_end_timer = 0
-bonus_grow = False
+players = []
+winner = None
 
 width = screen.get_width()
 height = screen.get_height()
@@ -59,19 +56,21 @@ while running:
             running = False
             
         elif event.type == pygame.KEYDOWN:  # ZQSD Check + ULDR Check + SPACE Check
-            if (event.key == pygame.K_z or event.key == pygame.K_UP) and direction != "DOWN" and game_state != "PAUSE":
-                next_direction = "UP"
+            for p in players:
+                if event.key in p["controls"]:
+                    if p["controls"][event.key] == "UP" and p["direction"] != "DOWN" and game_state != "PAUSE":
+                        p["next_direction"] = p["controls"][event.key]
             
-            elif (event.key == pygame.K_s or event.key == pygame.K_DOWN) and direction != "UP" and game_state != "PAUSE":
-                next_direction = "DOWN"
+                    elif p["controls"][event.key] == "DOWN" and p["direction"] != "UP" and game_state != "PAUSE":
+                        p["next_direction"] = p["controls"][event.key]
                 
-            elif (event.key == pygame.K_q or event.key == pygame.K_LEFT) and direction != "RIGHT" and game_state != "PAUSE":
-                next_direction = "LEFT"
+                    elif p["controls"][event.key] == "LEFT" and p["direction"] != "RIGHT" and game_state != "PAUSE":
+                        p["next_direction"] = p["controls"][event.key]
                 
-            elif (event.key == pygame.K_d or event.key == pygame.K_RIGHT) and direction != "LEFT" and game_state != "PAUSE":
-                next_direction = "RIGHT"
+                    elif p["controls"][event.key] == "RIGHT" and p["direction"] != "LEFT" and game_state != "PAUSE":
+                        p["next_direction"] = p["controls"][event.key]
                 
-            elif event.key == pygame.K_SPACE and (game_state == "GAME" or game_state == "PAUSE"):
+            if event.key == pygame.K_SPACE and (game_state == "GAME" or game_state == "PAUSE"):
                 game_state = "PAUSE" if game_state == "GAME" else "GAME"
                 
         elif event.type == pygame.VIDEORESIZE:  # Screen Resize
@@ -98,27 +97,27 @@ while running:
                         game_state = "MENU2"
                         
                     elif value == "EASY":
-                        selected_grid_size, move_interval, max_food, food_interval, game_state, difficulty = game.game_setup(settings.EASY)
+                        selected_grid_size, max_food, food_interval, game_state, difficulty = game.game_setup(settings.EASY)
                         if extra_mode:
                             max_obstacles, max_powerup, powerup_interval = game.extra_game_setup(settings.EASY)
                         
                     elif value == "NORMAL":
-                        selected_grid_size, move_interval, max_food, food_interval, game_state, difficulty = game.game_setup(settings.NORMAL)
+                        selected_grid_size, max_food, food_interval, game_state, difficulty = game.game_setup(settings.NORMAL)
                         if extra_mode:
                             max_obstacles, max_powerup, powerup_interval = game.extra_game_setup(settings.NORMAL)
                         
                     elif value == "HARD":
-                        selected_grid_size, move_interval, max_food, food_interval, game_state, difficulty = game.game_setup(settings.HARD)
+                        selected_grid_size, max_food, food_interval, game_state, difficulty = game.game_setup(settings.HARD)
                         if extra_mode:
                             max_obstacles, max_powerup, powerup_interval = game.extra_game_setup(settings.HARD)
                         
                     elif value == "ULTRA HARD":
-                        selected_grid_size, move_interval, max_food, food_interval, game_state, difficulty = game.game_setup(settings.ULTRA_HARD)
+                        selected_grid_size, max_food, food_interval, game_state, difficulty = game.game_setup(settings.ULTRA_HARD)
                         if extra_mode:
                             max_obstacles, max_powerup, powerup_interval = game.extra_game_setup(settings.ULTRA_HARD)
                         
                     elif value == "TRY AGAIN":
-                        selected_grid_size, move_interval, max_food, food_interval, game_state, difficulty = game.game_setup(difficulty)
+                        selected_grid_size, max_food, food_interval, game_state, difficulty = game.game_setup(difficulty)
                         if extra_mode:
                             max_obstacles, max_powerup, powerup_interval = game.extra_game_setup(difficulty)
                         
@@ -130,27 +129,23 @@ while running:
                         extra_mode = True if extra_mode == False else False
                     
                     # New Game
-                    grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)                   
-                    ingame_snake, head, direction, next_direction, grow, food_pos, score, speed_limit, move_timer, free_cases, food_interval, obstacles_pos, powerup_pos = game.new_game(
+                    grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
+                    difficulty_name = difficulty["name"]                
+                    players, food_pos, free_cases, food_interval, obstacles_pos, powerup_pos = game.new_game(
                         selected_grid_size, 
                         max_food, 
                         food_interval,
-                        difficulty
+                        difficulty,
+                        mode
                     )
-                    difficulty_name = difficulty["name"]
-                    old_move_interval = 0
-                    speed_end_timer = 0
-                    bonus_grow = False
-                    bonus_timer = 0
                     if extra_mode:
                         obstacles_pos, powerup_pos, powerup_interval = game.new_extra_game(
                             grid_size, 
-                            ingame_snake, 
                             food_pos, 
-                            head,
                             max_obstacles, 
                             max_powerup, 
-                            difficulty
+                            difficulty,
+                            players
                         )
 
     # Principal Menu
@@ -186,211 +181,120 @@ while running:
     
         # Offsets
         grid_offset_x, grid_offset_y = game.offsetts_check(width, height, grid_size, cell_size)
+        
+        # Moving Interval
+        for p in players:
+            p["move_timer"] += dt
+            p["head"] = p["snake"][0]
+            p["speed_end_timer"], p["move_interval"] = game.speed_timer(
+                p["speed_end_timer"],
+                p["move_interval"],
+                p["old_move_interval"],
+                dt
+            )
+
+        # Move
+        for p in players:
+            game.move(p)
+
+        # Eat food
+        for p in players:
+            food_pos, max_food, food_interval, game_state = food.eat_food_check(
+                p,
+                players,
+                grid_size,
+                difficulty,
+                game_state,
+                obstacles_pos,
+                food_pos,
+                max_food,
+                food_interval,
+                mode
+            )
+            
+        # Eat Power Up
+        for p in players:
+            game_state, winner, powerup_pos, max_powerup, powerup_interval = food.eat_powerup_check(
+                p, 
+                players,
+                grid_size, 
+                difficulty, 
+                game_state,
+                obstacles_pos, 
+                food_pos,
+                max_food, 
+                powerup_pos, 
+                max_powerup, 
+                powerup_interval
+            )
+        
+        # Best Score Check
+        mode2 = "EXTRA" if extra_mode else "CLASSIC"
+        for p in players:
+            p["best_score"] = game.best_score_check(p, highscores, mode2, difficulty_name)
+        
+        # Speed & Len Check
+        for p in players:
+            p["speed"] = round(1 / p["move_interval"], 1)
+            p["snake_len"] = len(p["snake"])
+    
+        # Grid-Out & Que-Eating & Multiplayer Collisions Check
+        if mode != "SOLO":
+            game_state, winner = game.hit_player_check(
+                players[0]["head"], 
+                players[1]["head"], 
+                players[0]["snake"], 
+                players[1]["snake"]
+            ) 
+        for p in players:
+            if game.grid_out_check(p["head"], grid_size) or game.eat_que_check(p["snake"], p["head"]):
+                if mode == "SOLO":
+                    game_state = "GAME_OVER"
+                    audio.LOSE_SOUND.play()
+                else:
+                    if p["name"] == "player_1":
+                        game_state, winner = "PLAYER_WIN", "P2"
+                    else:
+                        game_state, winner = "PLAYER_WIN", "P1"
+                    audio.WIN_SOUND.play()
+        
+        # Hit-Obstacles Check
+        if extra_mode:
+            for p in players:
+                if game.hit_obstacles_check(p["head"], obstacles_pos):
+                    if mode == "SOLO":
+                        game_state = "GAME_OVER"
+                        audio.LOSE_SOUND.play()
+                    else:
+                        if p["name"] == "player_1":
+                            game_state, winner = "PLAYER_WIN", "P2"
+                        else:
+                            game_state, winner = "PLAYER_WIN", "P1"
+                        audio.WIN_SOUND.play()
 
         # Draw Grid
         grid.draw_grid(screen, grid_size, cell_size, grid_offset_x, grid_offset_y)
         
-        # Moving Interval
-        move_timer += dt
-        head = ingame_snake[0]
-        
-        if speed_end_timer > 0:
-            speed_end_timer -= dt
-            
-            if speed_end_timer <= 0:
-                move_interval = old_move_interval
-
-        # Turn
-        if move_timer >= move_interval:
-            move_timer = 0
-            
-            if bonus_grow:
-                grow = True
-                bonus_timer -= 1
-                
-                if bonus_timer <= 0:
-                    bonus_grow = False
-                    
-            direction, ingame_snake, grow, head = game.turn(
-                next_direction,
-                ingame_snake,
-                grow
-            )
-
-            # Eat food
-            if head in food_pos:
-                score += 1
-                grow = True
-                free_cases = game.free_case_check(grid_size, ingame_snake, max_food, head)
-                move_interval, old_move_interval, speed_limit = game.speed_adjustment(score, speed_limit, move_interval, old_move_interval)
-                audio.FOOD_SOUND.play()
-                
-                # Generate Food
-                for i, item in enumerate(food_pos):
-                    if item == head:
-                        food_pos[i] = food.generate_food(
-                            grid_size, 
-                            ingame_snake,
-                            food_pos,
-                            obstacles_pos,
-                            head
-                        )
-                        
-                # Food Downgrade
-                if free_cases <= food_interval:
-                    max_food -= 1
-                    food_interval = (max_food - 1) * difficulty["food_interval"]
-                    food_pos.pop()
-                    
-                    if free_cases <= 0:
-                        game_state = "WIN"
-                        audio.WIN_SOUND.play()
-            
-            # Eat Power Up
-            for powerup in powerup_pos:
-                
-                if powerup is None:
-                    continue
-                    
-                if head == powerup["pos"]:
-                    free_cases = game.free_case_check(grid_size, ingame_snake, max_food, head)
-                    
-                    if powerup["type"] == "POISON":
-                        score -= 1
-                        ingame_snake.pop()
-                        audio.POISON_SOUND.play()
-                        
-                        if len(ingame_snake) <= 0 or score < 0:
-                            game_state = "GAME_OVER"
-                            audio.LOSE_SOUND.play()
-                            
-                        powerup_pos, max_powerup, powerup_interval = game.reset_powerup(
-                            head, 
-                            ingame_snake, 
-                            food_pos, 
-                            powerup_pos,
-                            powerup_interval, 
-                            obstacles_pos, 
-                            grid_size, 
-                            difficulty, 
-                            free_cases, 
-                            max_powerup
-                        )
-                            
-                    elif powerup["type"] == "SPEED":
-                        score += 1
-                        grow = True
-                        audio.POWERUP_SOUND.play()
-                        
-                        if speed_end_timer <= 0:
-                            old_move_interval = move_interval
-                            move_interval *= 0.75
-                            speed_end_timer = 5
-                        else:
-                            speed_end_timer = 5
-                        
-                        move_interval, old_move_interval, speed_limit = game.speed_adjustment(score, speed_limit, move_interval, old_move_interval)
-                        powerup_pos, max_powerup, powerup_interval = game.reset_powerup(
-                            head, 
-                            ingame_snake, 
-                            food_pos, 
-                            powerup_pos, 
-                            powerup_interval,
-                            obstacles_pos, 
-                            grid_size, 
-                            difficulty, 
-                            free_cases, 
-                            max_powerup
-                        )       
-                        
-                    elif powerup["type"] == "SCORE":
-                        score += 5
-                        grow = True
-                        audio.POWERUP_SOUND.play()
-                        
-                        move_interval, old_move_interval, speed_limit = game.speed_adjustment(score, speed_limit, move_interval, old_move_interval)
-                        powerup_pos, max_powerup, powerup_interval = game.reset_powerup(
-                            head, 
-                            ingame_snake, 
-                            food_pos, 
-                            powerup_pos, 
-                            powerup_interval,
-                            obstacles_pos, 
-                            grid_size, 
-                            difficulty, 
-                            free_cases, 
-                            max_powerup
-                        )
-                        
-                    elif powerup["type"] == "BONUS":
-                        score += 1
-                        grow = True
-                        bonus_grow = True
-                        bonus_timer = 5
-                        audio.POWERUP_SOUND.play()
-                        
-                        move_interval, old_move_interval, speed_limit = game.speed_adjustment(score, speed_limit, move_interval, old_move_interval)
-                        powerup_pos, max_powerup, powerup_interval = game.reset_powerup(
-                            head, 
-                            ingame_snake, 
-                            food_pos, 
-                            powerup_pos, 
-                            powerup_interval,
-                            obstacles_pos, 
-                            grid_size, 
-                            difficulty, 
-                            free_cases, 
-                            max_powerup
-                        )
-        
-        # Best Score
-        
-        mode2 = "EXTRA" if extra_mode else "CLASSIC"
-        
-        if score > highscores[mode2][difficulty_name]:
-            highscores[mode2][difficulty_name] = score
-        
-        best_score = highscores[mode2][difficulty_name]
-        
-        # Speed & Len  
-        speed = round(1 / move_interval, 1)
-        snake_len = len(ingame_snake)
-        
-        # Draw Score & Speed & Len
-        game.draw_score(screen, score, best_score, speed, snake_len, width, height)
-        
-        if len(ingame_snake) > 0:
-            head = ingame_snake[0]
-    
-        # Grid-Out Check
-        if game.grid_out_check(head, grid_size):
-            game_state = "GAME_OVER"
-            audio.LOSE_SOUND.play()
-        
-        # Que-Eating Check
-        if game.eat_que_check(ingame_snake, head):
-            game_state = "GAME_OVER"
-            audio.LOSE_SOUND.play()
-        
-        # Hit-Obstacles Check
-        if extra_mode:
-            if game.hit_obstacles_check(head, obstacles_pos):
-                game_state = "GAME_OVER"
-                audio.LOSE_SOUND.play()
+        # Draw Score
+        for p in players:
+            game.draw_score(screen, p, width, height)
+            if p["snake_len"] > 0:
+                p["head"] = p["snake"][0]
 
         # Draw Food
         for item in food_pos:
             food.draw_food(screen, item, grid_offset_x, grid_offset_y, cell_size)
 
         # Draw Snake
-        for snake_case in ingame_snake:
-            if (
-                head[0] >= 0 
-                and head[0] < grid_size 
-                and head[1] >= 0 
-                and head[1] < grid_size
-            ):
-                snake.draw_snake(screen, snake_case, grid_offset_x, grid_offset_y, cell_size)
+        for p in players:
+            for snake_case in p["snake"]:
+                if (
+                    p["head"][0] >= 0 
+                    and p["head"][0] < grid_size 
+                    and p["head"][1] >= 0 
+                    and p["head"][1] < grid_size
+                ):
+                    snake.draw_snake(screen, snake_case, grid_offset_x, grid_offset_y, cell_size)
                 
         if extra_mode:
             
@@ -424,8 +328,9 @@ while running:
             food.draw_food(screen, item, grid_offset_x, grid_offset_y, cell_size)
         
         # Draw Snake
-        for snake_case in ingame_snake:
-            snake.draw_snake(screen, snake_case, grid_offset_x, grid_offset_y, cell_size)
+        for p in players:
+            for snake_case in p["snake"]:
+                snake.draw_snake(screen, snake_case, grid_offset_x, grid_offset_y, cell_size)
         
         if extra_mode:
             
@@ -442,7 +347,8 @@ while running:
                 food.draw_powerup(screen, powerup["pos"], powerup["type"], grid_offset_x, grid_offset_y, cell_size)
                 
         # Draw Score
-        game.draw_score(screen, score, best_score, speed, snake_len, width, height)
+        for p in players:
+            game.draw_score(screen, p, width, height)
         
         # Print PAUSED
         menu.print_game_result(screen, "PAUSED", width, height)
@@ -459,7 +365,8 @@ while running:
         menu.print_game_result(screen, "GAME OVER", width, height)
         
         # Draw Score
-        game.draw_score(screen, score, best_score, speed, snake_len, width, height)
+        for p in players:
+            game.draw_score(screen, p, width, height)
         
         # Buttons
         buttons = menu.draw_game_over(screen, width, height)
@@ -478,13 +385,18 @@ while running:
         menu.print_game_result(screen, "YOU WIN", width, height)
         
         # Draw Score
-        game.draw_score(screen, score, best_score, width, height)
+        for p in players:
+            game.draw_score(screen, p, width, height)
         
         # Buttons
         buttons = menu.draw_game_over(screen, width, height)
         
         # Grid Size and Cell Size Check
         grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
+        
+    elif game_state == "PLAYER_WIN":
+        # Set screen color
+        screen.fill(settings.BACKGROUND_COLOR)
         
     # Print
     pygame.display.flip()

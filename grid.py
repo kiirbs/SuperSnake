@@ -17,13 +17,18 @@ def draw_grid(screen, grid_size, cell_size, grid_offset_x, grid_offset_y):
                 1
             )
             
-def generate_obstacles(grid_size, snake, food_pos, obstacles_pos, head): # Creer des lignes d'obstacle ? Peut etre avec random ?
+def generate_obstacles(grid_size, food_pos, obstacles_pos, players): # Creer des lignes d'obstacle ? Peut etre avec random ?
     
     possible_obstacles_pos = [
         [i, j]
         for i in range(grid_size) 
         for j in range(grid_size)
-        if [i, j] not in snake and [i, j] not in food_pos and [i, j] not in obstacles_pos and [i, j] != head
+        if not any(
+            [i, j] in p["snake"]
+            for p in players
+        )
+        and [i, j] not in food_pos 
+        and [i, j] not in obstacles_pos
     ]
     
     if not possible_obstacles_pos:

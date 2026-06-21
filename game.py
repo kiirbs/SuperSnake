@@ -21,16 +21,14 @@ def offsetts_check(width, height, grid_size, cell_size):
     
     return grid_offset_x, grid_offset_y
 
-def free_case_check(grid_size, ingame_snake, max_food, head):
+def free_case_check(grid_size, max_food, players):
     
     grid_len = grid_size ** 2
     
     snake_len = 0
-    for _ in ingame_snake:
-        snake_len += 1
-        
-    if head not in ingame_snake:
-        snake_len += 1
+    for p in players:
+        for _ in p["snake"]:
+            snake_len += 1
         
     return grid_len - snake_len - max_food
 
@@ -43,14 +41,89 @@ def speed_adjustment(score, speed_limit, move_interval, old_move_interval):
         
     return move_interval, old_move_interval, speed_limit
 
-def new_game(grid_size, max_food, food_interval, difficulty):
+def create_player(grid_size, difficulty, controls, name):
     
-    # Snake
-    ingame_snake = snake.generate_snake(grid_size)
-    head = ingame_snake[0]
+    new_snake = snake.generate_snake(grid_size)
     direction = random.choice(["UP", "DOWN", "LEFT", "RIGHT"])
-    next_direction = direction
-    grow = False
+    
+    player = {
+        "name": name,
+        
+        "snake": new_snake,
+        "head": new_snake[0],
+        
+        "direction": direction,
+        "next_direction": direction,
+        
+        "score": 0,
+        "best_score": 0,
+        "speed_limit": 5,
+        
+        "grow": False,
+        
+        "move_timer": 0,
+        "move_interval": difficulty["move_interval"],
+        "old_move_interval": 0,
+        
+        "speed_end_timer": 0,
+        "bonus_timer": 0,
+        "bonus_grow": False,
+        
+        "speed": round(1 / difficulty["move_interval"], 1),
+        "snake_len": len(new_snake),
+        
+        "controls": controls
+    }
+    
+    return player
+
+def new_game(grid_size, max_food, food_interval, difficulty, mode):
+    
+    if mode == "SOLO":
+        player = create_player(
+            grid_size,
+            difficulty,
+            {
+                pygame.K_UP: "UP",
+                pygame.K_z: "UP",
+                pygame.K_LEFT: "LEFT",
+                pygame.K_q: "LEFT",
+                pygame.K_DOWN: "DOWN",
+                pygame.K_s: "DOWN",
+                pygame.K_RIGHT: "RIGHT",
+                pygame.K_d: "RIGHT"
+            },
+            "player_1"
+        )
+        players = [player]
+    else:
+        player1 = create_player(
+            grid_size,
+            difficulty,
+            {
+                pygame.K_z: "UP",
+                pygame.K_q: "LEFT",
+                pygame.K_s: "DOWN",
+                pygame.K_d: "RIGHT"
+            },
+            "player_1"
+        )
+        player2 = create_player(
+            grid_size,
+            difficulty,
+            {
+                pygame.K_UP: "UP",
+                pygame.K_o: "UP",
+                pygame.K_LEFT: "LEFT",
+                pygame.K_k: "LEFT",
+                pygame.K_DOWN: "DOWN",
+                pygame.K_l: "DOWN",
+                pygame.K_RIGHT: "RIGHT",
+                pygame.K_m: "RIGHT"
+            },
+            "player_2"
+        )
+        players = [player1, player2]
     
     # Obstacles
     obstacles_pos = []
@@ -61,35 +134,37 @@ def new_game(grid_size, max_food, food_interval, difficulty):
     # Food
     food_pos = []
     for _ in range(max_food):
-        food_pos.append(food.generate_food(grid_size, ingame_snake, food_pos, obstacles_pos, head))
+        food_pos.append(food.generate_food(grid_size, food_pos, obstacles_pos, players))
         
     food_interval = (max_food - 1) * difficulty["food_interval"]
-        
-    # Score
-    score = 0
-    speed_limit = 5
-    
-    # Auto-move
-    move_timer = 0
     
     # Free Cases
-    free_cases = free_case_check(grid_size, ingame_snake, max_food, head)
+    free_cases = free_case_check(grid_size, max_food, players)
     
-    return ingame_snake, head, direction, next_direction, grow, food_pos, score, speed_limit, move_timer, free_cases, food_interval, obstacles_pos, powerup_pos
+    return players, food_pos, free_cases, food_interval, obstacles_pos, powerup_pos
 
-def new_extra_game(grid_size, ingame_snake, food_pos, head, max_obstacles, max_powerup, difficulty):
+def new_extra_game(grid_size, food_pos, max_obstacles, max_powerup, difficulty, players):
     
     powerup_pos = []
     obstacles_pos = []
+    occupied_cases = []
     
     max_obstacle_len = grid_size // 4
     possible_direction = ["UP", "LEFT", "DOWN", "RIGHT"]
     
+    for p in players:
+        occupied_cases.extend(p["snake"])
+
+    occupied_cases.extend(food_pos)
+    occupied_cases.extend(obstacles_pos)
+    occupied_cases.extend(powerup_pos)
+    
     for _ in range(max_obstacles):
         
         obstacle_len = random.randint(1, max_obstacle_len)
-        obstacle = grid.generate_obstacles(grid_size, ingame_snake, food_pos, obstacles_pos, head)
+        obstacle = grid.generate_obstacles(grid_size, food_pos, obstacles_pos, players)
         obstacles_pos.append(obstacle)
+        occupied_cases.append(obstacle)
         direction = random.choice(possible_direction)
         
         for _ in range(obstacle_len):
@@ -107,25 +182,21 @@ def new_extra_game(grid_size, ingame_snake, food_pos, head, max_obstacles, max_p
                 or next_obstacle[0] >= grid_size 
                 or next_obstacle[1] < 0 
                 or next_obstacle[1] >= grid_size
-                or next_obstacle in ingame_snake 
-                or next_obstacle in food_pos 
-                or next_obstacle in powerup_pos 
-                or next_obstacle in obstacles_pos
-                or next_obstacle == head
+                or next_obstacle in occupied_cases
             ):
                 break
             
             obstacle = next_obstacle
             obstacles_pos.append(obstacle)
+            occupied_cases.append(obstacle)
             
     for _ in range(max_powerup):
         powerup_pos.append(food.generate_powerup(
-            grid_size, 
-            ingame_snake, 
+            grid_size,
             food_pos, 
             powerup_pos, 
             obstacles_pos, 
-            head
+            players
         ))
                 
     powerup_interval = (max_powerup - 1) * difficulty["power_up_interval"] if max_powerup > 1 else 1
@@ -146,18 +217,49 @@ def turn(next_direction, ingame_snake, grow):
             
     return direction, ingame_snake, grow, head
 
-def reset_powerup(head, ingame_snake, food_pos, powerup_pos, powerup_interval, obstacles_pos, grid_size, difficulty, free_cases, max_powerup):
+def update_player(player):
+    
+    player["direction"], player["snake"], player["grow"], player["head"] = turn(
+        player["next_direction"],
+        player["snake"],
+        player["grow"]
+    )
+    
+def move(player):
+    
+    if player["move_timer"] >= player["move_interval"]:
+        player["move_timer"] = 0
+            
+        if player["bonus_grow"]:
+            player["grow"] = True
+            player["bonus_timer"] -= 1
+                
+            if player["bonus_timer"] <= 0:
+                player["bonus_grow"] = False
+                    
+        update_player(player)
+
+def speed_timer(speed_end_timer, move_interval, old_move_interval, dt):
+    
+    if speed_end_timer > 0:
+            speed_end_timer -= dt
+            
+            if speed_end_timer <= 0:
+                move_interval = old_move_interval
+                
+    return speed_end_timer, move_interval
+
+def reset_powerup(players, head, food_pos, powerup_pos, powerup_interval, obstacles_pos, grid_size, difficulty, free_cases, max_powerup):
     
     # Generate Powerup
     for i, item in enumerate(powerup_pos):
         if item["pos"] == head:
             powerup_pos[i] = food.generate_powerup(
-                grid_size, 
-                ingame_snake,
+                grid_size,
                 food_pos,
                 powerup_pos,
                 obstacles_pos,
-                head
+                players
             )
                         
     # Powerup Downgrade
@@ -167,6 +269,15 @@ def reset_powerup(head, ingame_snake, food_pos, powerup_pos, powerup_interval, o
         powerup_pos.pop()
         
     return powerup_pos, max_powerup, powerup_interval
+
+def best_score_check(player, highscores, mode2, difficulty_name):
+    
+    if player["score"] > highscores[mode2][difficulty_name]:
+            highscores[mode2][difficulty_name] = player["score"]
+        
+    best_score = highscores[mode2][difficulty_name]
+    
+    return best_score
 
 def grid_out_check(head, grid_size):
     
@@ -194,15 +305,27 @@ def hit_obstacles_check(head, obstacles_pos):
     
     return False
 
+def hit_player_check(head1, head2, snake1, snake2):
+    
+    if head1 == head2:
+        return "EGALITY", None
+    
+    if head1 in snake2:
+        return "PLAYER_WIN", "P2"
+    
+    if head2 in snake1:
+        return "PLAYER_WIN", "P1"
+    
+    return "GAME", None
+
 def game_setup(difficulty):
     
     selected_grid_size = difficulty["grid_size"]
-    move_interval = difficulty["move_interval"]
     max_food = difficulty["max_food"]
     food_interval = difficulty["food_interval"]
     game_state = "GAME"
     
-    return selected_grid_size, move_interval, max_food, food_interval, game_state, difficulty
+    return selected_grid_size, max_food, food_interval, game_state, difficulty
 
 def extra_game_setup(difficulty):
     
@@ -237,20 +360,22 @@ def create_text(font, text, color, rect):
     
     return text_surface, text_rect
 
-def draw_score(screen, score, best_score, speed, snake_len, width, height):
+def draw_score(screen, player, width, height):
     
     dw, dh = menu.get_scale(width, height)
     
     score_width = max(settings.DEFAULT_SCORE_MIN_WIDTH, int(settings.DEFAULT_SCORE_WIDTH * dw))
     score_height = max(settings.DEFAULT_SCORE_MIN_HEIGHT, int(settings.DEFAULT_SCORE_HEIGHT * dh))
     
+    x = 40 if player["name"] == "player_1" else width - 40 - score_width
+    
     base_font_size = max(3, int(settings.DEFAULT_SCORE_FONT * dh))
     score_font = pygame.font.Font(None, base_font_size)
     
-    score_rect = create_rect(int(40 * dw), int((30 * dh) + score_height), score_width, score_height)
-    best_score_rect = create_rect(int(40 * dw), int(20 * dh), score_width, score_height)
-    speed_rect = create_rect(int(40 * dw), int((40 * dh) + score_height * 2), score_width, score_height)
-    snake_len_rect = create_rect(int(40 * dw), int((50 * dh) + score_height * 3), score_width, score_height)
+    score_rect = create_rect(int(x * dw), int((30 * dh) + score_height), score_width, score_height)
+    best_score_rect = create_rect(int(x * dw), int(20 * dh), score_width, score_height)
+    speed_rect = create_rect(int(x * dw), int((40 * dh) + score_height * 2), score_width, score_height)
+    snake_len_rect = create_rect(int(x * dw), int((50 * dh) + score_height * 3), score_width, score_height)
         
     pygame.draw.rect(
         screen,
@@ -275,25 +400,25 @@ def draw_score(screen, score, best_score, speed, snake_len, width, height):
     
     score_text_surface, score_text_rect = create_text(
         score_font, 
-        f"SCORE : {score}", 
+        f"SCORE : {player['score']}", 
         settings.TEXT_COLOR, 
         score_rect
     )
     best_score_text_surface, best_score_text_rect = create_text(
         score_font, 
-        f"BEST : {best_score}", 
+        f"BEST : {player['best_score']}", 
         settings.TEXT_COLOR, 
         best_score_rect
     )
     speed_text_surface, speed_text_rect = create_text(
         score_font, 
-        f"SPEED : {speed} C/S", 
+        f"SPEED : {player['speed']} C/S", 
         settings.TEXT_COLOR, 
         speed_rect
     )
     snake_len_text_surface, snake_len_text_rect = create_text(
         score_font, 
-        f"LENGHT : {snake_len}", 
+        f"LENGHT : {player['snake_len']}", 
         settings.TEXT_COLOR, 
         snake_len_rect
     )

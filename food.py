@@ -1,15 +1,22 @@
 import pygame
 import random
 
+import game
+import audio
 import settings
 
-def generate_food(grid_size, snake, food_pos, obstacles_pos, head):
+def generate_food(grid_size, food_pos, obstacles_pos, players):
     
     possible_food_pos = [
         [i, j]
         for i in range(grid_size) 
         for j in range(grid_size)
-        if [i, j] not in snake and [i, j] not in food_pos and [i, j] not in obstacles_pos and [i, j] != head
+        if not any(
+            [i, j] in p["snake"]
+            for p in players
+        )
+        and [i, j] not in food_pos
+        and [i, j] not in obstacles_pos
     ]
     
     if not possible_food_pos:
@@ -33,7 +40,7 @@ def draw_food(screen, food_pos, grid_offset_x, grid_offset_y, cell_size):
             )
         )
     
-def generate_powerup(grid_size, snake, food_pos, powerup_pos, obstacles_pos, head):
+def generate_powerup(grid_size, food_pos, powerup_pos, obstacles_pos, players):
     
     possible_effect = ["POISON", "SPEED", "SCORE", "BONUS"]
     
@@ -41,12 +48,13 @@ def generate_powerup(grid_size, snake, food_pos, powerup_pos, obstacles_pos, hea
         [i, j]
         for i in range(grid_size) 
         for j in range(grid_size)
-        if ([i, j] not in snake 
-            and [i, j] not in food_pos 
-            and [i, j] not in obstacles_pos 
-            and [i, j] not in powerup_pos 
-            and [i, j] != head
+        if not any(
+            [i, j] in p["snake"]
+            for p in players
         )
+        and [i, j] not in food_pos 
+        and [i, j] not in obstacles_pos 
+        and [i, j] not in powerup_pos
     ]
     
     if not possible_powerup_pos:
@@ -83,3 +91,162 @@ def draw_powerup(screen, pos, type, grid_offset_x, grid_offset_y, cell_size):
                 cell_size - 2
             )
         )
+    
+def eat_food_check(player, players, grid_size, difficulty, game_state, obstacles_pos, food_pos, max_food, food_interval, mode):
+    
+    if player["head"] in food_pos:
+        player["score"] += 1
+        player["grow"] = True
+        free_cases = game.free_case_check(grid_size, max_food, players)
+        player["move_interval"], player["old_move_interval"], player["speed_limit"] = game.speed_adjustment(
+            player["score"], 
+            player["speed_limit"], 
+            player["move_interval"], 
+            player["old_move_interval"]
+        )
+        audio.FOOD_SOUND.play()
+                
+        # Generate Food
+        for i, item in enumerate(food_pos):
+            if item == player["head"]:
+                food_pos[i] = generate_food(
+                    grid_size, 
+                    food_pos,
+                    obstacles_pos,
+                    players
+                )
+                        
+        # Food Downgrade
+        if free_cases <= food_interval:
+            max_food -= 1
+            food_interval = (max_food - 1) * difficulty["food_interval"]
+            food_pos.pop()
+                    
+            if free_cases <= 0:
+                if mode == "SOLO":
+                    game_state = "WIN"
+                else:
+                    game_state = "EGALITY"
+                audio.WIN_SOUND.play()
+                        
+    return food_pos, max_food, food_interval, game_state
+
+def eat_powerup_check(player, players, grid_size, difficulty, game_state, obstacles_pos, food_pos, max_food, powerup_pos, max_powerup, powerup_interval):
+    
+    winner = None
+    
+    for powerup in powerup_pos:
+                
+        if powerup is None:
+            continue
+                    
+        if player["head"] == powerup["pos"]:
+            free_cases = game.free_case_check(grid_size, max_food, players)
+                    
+            if powerup["type"] == "POISON":
+                player["score"] -= 1
+                player["snake"].pop()
+                audio.POISON_SOUND.play()
+                        
+                if len(player["snake"]) <= 0 or player["score"] < 0:
+                    if player["name"] == "player_1":
+                        game_state, winner = "PLAYER_WIN", "P2"
+                    else:
+                        game_state, winner = "PLAYER_WIN", "P1"
+                    audio.WIN_SOUND.play()
+                            
+                powerup_pos, max_powerup, powerup_interval = game.reset_powerup(
+                    players,
+                    player["head"], 
+                    food_pos, 
+                    powerup_pos,
+                    powerup_interval, 
+                    obstacles_pos, 
+                    grid_size, 
+                    difficulty, 
+                    free_cases, 
+                    max_powerup
+                )
+                            
+            elif powerup["type"] == "SPEED":
+                player["score"] += 1
+                player["grow"] = True
+                audio.POWERUP_SOUND.play()
+                        
+                if player["speed_end_timer"] <= 0:
+                    player["old_move_interval"] = player["move_interval"]
+                    player["move_interval"] *= 0.75
+                    player["speed_end_timer"] = 5
+                else:
+                    player["speed_end_timer"] = 5
+                        
+                player["move_interval"], player["old_move_interval"], player["speed_limit"] = game.speed_adjustment(
+                    player["score"], 
+                    player["speed_limit"], 
+                    player["move_interval"], 
+                    player["old_move_interval"]
+                )
+                powerup_pos, max_powerup, powerup_interval = game.reset_powerup(
+                    players,
+                    player["head"], 
+                    food_pos, 
+                    powerup_pos, 
+                    powerup_interval,
+                    obstacles_pos, 
+                    grid_size, 
+                    difficulty, 
+                    free_cases, 
+                    max_powerup
+                )       
+                        
+            elif powerup["type"] == "SCORE":
+                player["score"] += 5
+                player["grow"] = True
+                audio.POWERUP_SOUND.play()
+                        
+                player["move_interval"], player["old_move_interval"], player["speed_limit"] = game.speed_adjustment(
+                    player["score"], 
+                    player["speed_limit"], 
+                    player["move_interval"], 
+                    player["old_move_interval"]
+                )
+                powerup_pos, max_powerup, powerup_interval = game.reset_powerup(
+                    players,
+                    player["head"],
+                    food_pos, 
+                    powerup_pos, 
+                    powerup_interval,
+                    obstacles_pos, 
+                    grid_size, 
+                    difficulty, 
+                    free_cases, 
+                    max_powerup
+                )
+                        
+            elif powerup["type"] == "BONUS":
+                player["score"] += 1
+                player["grow"] = True
+                player["bonus_grow"] = True
+                player["bonus_timer"] = 5
+                audio.POWERUP_SOUND.play()
+                        
+                player["move_interval"], player["old_move_interval"], player["speed_limit"] = game.speed_adjustment(
+                    player["score"], 
+                    player["speed_limit"], 
+                    player["move_interval"], 
+                    player["old_move_interval"]
+                )
+                powerup_pos, max_powerup, powerup_interval = game.reset_powerup(
+                    players,
+                    player["head"],
+                    food_pos, 
+                    powerup_pos, 
+                    powerup_interval,
+                    obstacles_pos, 
+                    grid_size, 
+                    difficulty, 
+                    free_cases, 
+                    max_powerup
+                )
+                
+    return game_state, winner, powerup_pos, max_powerup, powerup_interval
