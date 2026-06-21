@@ -6,6 +6,7 @@ import food
 import settings
 import menu
 import grid
+import audio
 
 def cell_size_check(selected_grid_size, width, height):
     
@@ -308,12 +309,15 @@ def hit_obstacles_check(head, obstacles_pos):
 def hit_player_check(head1, head2, snake1, snake2):
     
     if head1 == head2:
-        return "EGALITY", None
+        audio.LOSE_SOUND.play()
+        return "PLAYER_WIN", None
     
     if head1 in snake2:
+        audio.WIN_SOUND.play()
         return "PLAYER_WIN", "P2"
     
     if head2 in snake1:
+        audio.WIN_SOUND.play()
         return "PLAYER_WIN", "P1"
     
     return "GAME", None
@@ -367,15 +371,15 @@ def draw_score(screen, player, width, height):
     score_width = max(settings.DEFAULT_SCORE_MIN_WIDTH, int(settings.DEFAULT_SCORE_WIDTH * dw))
     score_height = max(settings.DEFAULT_SCORE_MIN_HEIGHT, int(settings.DEFAULT_SCORE_HEIGHT * dh))
     
-    x = 40 if player["name"] == "player_1" else width - 40 - score_width
+    x = int(40 * dh) if player["name"] == "player_1" else width - int(40 * dh) - score_width
     
     base_font_size = max(3, int(settings.DEFAULT_SCORE_FONT * dh))
     score_font = pygame.font.Font(None, base_font_size)
     
-    score_rect = create_rect(int(x * dw), int((30 * dh) + score_height), score_width, score_height)
-    best_score_rect = create_rect(int(x * dw), int(20 * dh), score_width, score_height)
-    speed_rect = create_rect(int(x * dw), int((40 * dh) + score_height * 2), score_width, score_height)
-    snake_len_rect = create_rect(int(x * dw), int((50 * dh) + score_height * 3), score_width, score_height)
+    score_rect = create_rect(x, int((30 * dh) + score_height), score_width, score_height)
+    best_score_rect = create_rect(x, int(20 * dh), score_width, score_height)
+    speed_rect = create_rect(x, int((40 * dh) + score_height * 2), score_width, score_height)
+    snake_len_rect = create_rect(x, int((50 * dh) + score_height * 3), score_width, score_height)
         
     pygame.draw.rect(
         screen,

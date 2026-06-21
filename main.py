@@ -358,7 +358,7 @@ while running:
         # Set screen color
         screen.fill(settings.BACKGROUND_COLOR)
         
-        #if score > highscores[mode2][difficulty_name]:
+        # Save Highscore
         save.save_highscores(highscores)
         
         # Print GAME OVER
@@ -378,7 +378,7 @@ while running:
         # Set screen color
         screen.fill(settings.BACKGROUND_COLOR)
         
-        #if score > highscores[mode2][difficulty_name]:
+        # Save Highscore
         save.save_highscores(highscores)
         
         # Print YOU WIN
@@ -397,6 +397,29 @@ while running:
     elif game_state == "PLAYER_WIN":
         # Set screen color
         screen.fill(settings.BACKGROUND_COLOR)
+        
+        if winner == "P1":
+            text = "PLAYER 1 WIN"
+        elif winner == "P2":
+            text = "PLAYER 2 WIN"
+        else:
+            text = "EQUALITY"
+        
+        # Save Highscore
+        save.save_highscores(highscores)
+        
+        # Print YOU WIN
+        menu.print_game_result(screen, text, width, height)
+        
+        # Draw Score
+        for p in players:
+            game.draw_score(screen, p, width, height)
+        
+        # Buttons
+        buttons = menu.draw_game_over(screen, width, height)
+        
+        # Grid Size and Cell Size Check
+        grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
         
     # Print
     pygame.display.flip()
