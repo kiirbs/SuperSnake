@@ -24,7 +24,8 @@ dt = 0
 # Setup
 game_state = "MENU"
 mode = "SOLO"
-extra_mode = False
+obstacle_mode = False
+powerup_mode = False
 best_score = 0
 difficulty = settings.NORMAL
 difficulty_name = difficulty["name"]
@@ -98,35 +99,48 @@ while running:
                         
                     elif value == "EASY":
                         selected_grid_size, max_food, food_interval, game_state, difficulty = game.game_setup(settings.EASY)
-                        if extra_mode:
-                            max_obstacles, max_powerup, powerup_interval = game.extra_game_setup(settings.EASY)
+                        if obstacle_mode:
+                            max_obstacles = game.obstacle_game_setup(settings.EASY)
+                        if powerup_mode:
+                            max_powerup, powerup_interval = game.powerup_game_setup(settings.EASY)
                         
                     elif value == "NORMAL":
                         selected_grid_size, max_food, food_interval, game_state, difficulty = game.game_setup(settings.NORMAL)
-                        if extra_mode:
-                            max_obstacles, max_powerup, powerup_interval = game.extra_game_setup(settings.NORMAL)
+                        if obstacle_mode:
+                            max_obstacles = game.obstacle_game_setup(settings.NORMAL)
+                        if powerup_mode:
+                            max_powerup, powerup_interval = game.powerup_game_setup(settings.NORMAL)
                         
                     elif value == "HARD":
                         selected_grid_size, max_food, food_interval, game_state, difficulty = game.game_setup(settings.HARD)
-                        if extra_mode:
-                            max_obstacles, max_powerup, powerup_interval = game.extra_game_setup(settings.HARD)
+                        if obstacle_mode:
+                            max_obstacles = game.obstacle_game_setup(settings.HARD)
+                        if powerup_mode:
+                            max_powerup, powerup_interval = game.powerup_game_setup(settings.HARD)
                         
                     elif value == "ULTRA HARD":
                         selected_grid_size, max_food, food_interval, game_state, difficulty = game.game_setup(settings.ULTRA_HARD)
-                        if extra_mode:
-                            max_obstacles, max_powerup, powerup_interval = game.extra_game_setup(settings.ULTRA_HARD)
+                        if obstacle_mode:
+                            max_obstacles = game.obstacle_game_setup(settings.ULTRA_HARD)
+                        if powerup_mode:
+                            max_powerup, powerup_interval = game.powerup_game_setup(settings.ULTRA_HARD)
                         
                     elif value == "TRY AGAIN":
                         selected_grid_size, max_food, food_interval, game_state, difficulty = game.game_setup(difficulty)
-                        if extra_mode:
-                            max_obstacles, max_powerup, powerup_interval = game.extra_game_setup(difficulty)
+                        if obstacle_mode:
+                            max_obstacles = game.obstacle_game_setup(difficulty)
+                        if powerup_mode:
+                            max_powerup, powerup_interval = game.powerup_game_setup(difficulty)
                         
                     elif value == "RETURN TO MENU" or value == "RETURN":
                         game_state = "MENU"
                         best_score = 0
                         
-                    elif value == "EXTRA":
-                        extra_mode = True if extra_mode == False else False
+                    elif value == "OBSTACLE":
+                        obstacle_mode = False if obstacle_mode else True
+                        
+                    elif value == "POWERUP":
+                        powerup_mode = False if powerup_mode else True
                     
                     # New Game
                     grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
@@ -138,14 +152,21 @@ while running:
                         difficulty,
                         mode
                     )
-                    if extra_mode:
-                        obstacles_pos, powerup_pos, powerup_interval = game.new_extra_game(
+                    if obstacle_mode:
+                        obstacles_pos, powerup_pos = game.new_obstacle_game(
                             grid_size, 
                             food_pos, 
                             max_obstacles, 
+                            players
+                        )
+                    if powerup_mode:
+                        powerup_pos, powerup_interval = game.new_powerup_game(
+                            grid_size, 
+                            food_pos,  
                             max_powerup, 
                             difficulty,
-                            players
+                            players,
+                            obstacles_pos
                         )
 
     # Principal Menu
@@ -168,7 +189,7 @@ while running:
         
         # Draw Difficulty Menu   
         buttons = menu.draw_menu(screen, width, height, settings.DIFFICULT)
-        buttons = menu.draw_second_menu(screen, buttons, extra_mode, width, height, settings.DIFFICULT)
+        buttons = menu.draw_second_menu(screen, buttons, obstacle_mode, powerup_mode, width, height, settings.DIFFICULT)
         
         # Grid Size and Cell Size Check
         grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
@@ -215,25 +236,26 @@ while running:
             )
             
         # Eat Power Up
-        for p in players:
-            game_state, text, powerup_pos, max_powerup, powerup_interval = food.eat_powerup_check(
-                p, 
-                players,
-                grid_size, 
-                difficulty, 
-                game_state,
-                obstacles_pos, 
-                food_pos,
-                max_food, 
-                powerup_pos, 
-                max_powerup, 
-                powerup_interval,
-                mode,
-                text
-            )
+        if powerup_mode:
+            for p in players:
+                game_state, text, powerup_pos, max_powerup, powerup_interval = food.eat_powerup_check(
+                    p, 
+                    players,
+                    grid_size, 
+                    difficulty, 
+                    game_state,
+                    obstacles_pos, 
+                    food_pos,
+                    max_food, 
+                    powerup_pos, 
+                    max_powerup, 
+                    powerup_interval,
+                    mode,
+                    text
+                )
         
         # Best Score Check
-        mode2 = "EXTRA" if extra_mode else "CLASSIC"
+        mode2 = "EXTRA" if obstacle_mode or powerup_mode else "CLASSIC"
         for p in players:
             p["best_score"] = game.best_score_check(p, highscores, mode2, difficulty_name)
         
@@ -265,7 +287,7 @@ while running:
                     audio.WIN_SOUND.play()
         
         # Hit-Obstacles Check
-        if extra_mode:
+        if obstacle_mode:
             for p in players:
                 if game.hit_obstacles_check(p["head"], obstacles_pos):
                     if mode == "SOLO":
@@ -301,15 +323,15 @@ while running:
                     and p["head"][1] < grid_size
                 ):
                     snake.draw_snake(screen, snake_case, grid_offset_x, grid_offset_y, cell_size)
-                
-        if extra_mode:
-            
-            # Draw Obstacles
+                    
+        # Draw Obstacles    
+        if obstacle_mode:
             for item in obstacles_pos:
                 
                 grid.draw_obstacles(screen, item, grid_offset_x, grid_offset_y, cell_size)
                 
-            # Draw Power Up
+        # Draw Power Up   
+        if powerup_mode:
             for powerup in powerup_pos:
                 
                 if powerup is None:
@@ -338,13 +360,13 @@ while running:
             for snake_case in p["snake"]:
                 snake.draw_snake(screen, snake_case, grid_offset_x, grid_offset_y, cell_size)
         
-        if extra_mode:
-            
-            # Draw Obstacles
+        # Draw Obstacles
+        if obstacle_mode:
             for item in obstacles_pos:
                 grid.draw_obstacles(screen, item, grid_offset_x, grid_offset_y, cell_size)
                 
-            # Draw Power Up
+        # Draw Power Up
+        if powerup_mode: 
             for powerup in powerup_pos:
                 
                 if powerup is None:

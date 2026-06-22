@@ -152,7 +152,7 @@ def print_game_result(screen, game_result, width, height):
     
     screen.blit(text_surface, text_rect)
     
-def draw_second_menu(screen, buttons, extra_mode, width, height, states):
+def draw_second_menu(screen, buttons, obstacle_mode, powerup_mode, width, height, states):
     
     mouse_pos = pygame.mouse.get_pos()
     
@@ -178,7 +178,8 @@ def draw_second_menu(screen, buttons, extra_mode, width, height, states):
     y = height - (((height - settings.DEFAULT_TITLE_MARGE) - menu_height) // 2) - button_height
     
     return_rect = game.create_rect(return_x, y, button_width, button_height)
-    extra_rect = game.create_rect(extra_x, y, button_width, button_height)
+    obstacle_rect = game.create_rect(extra_x, y, button_width, button_height)
+    powerup_rect = game.create_rect(extra_x, y - int(10*dh) - button_height, button_width, button_height)
     
     if return_rect.collidepoint(mouse_pos):
         return_color = settings.MENU_HOVER_COLOR
@@ -192,26 +193,51 @@ def draw_second_menu(screen, buttons, extra_mode, width, height, states):
         return_text_color = settings.TEXT_COLOR
         return_font = menu_font
         
-    if extra_rect.collidepoint(mouse_pos):
-        extra_color = settings.MENU_HOVER_COLOR
-        extra_text_color = settings.TEXT_HOVER_COLOR
-        extra_font = hover_font
+    if obstacle_rect.collidepoint(mouse_pos):
+        obstacle_color = settings.MENU_HOVER_COLOR
+        obstacle_text_color = settings.TEXT_HOVER_COLOR
+        obstacle_font = hover_font
                         
-        extra_rect = game.create_rect(extra_x - 5, y - 5, button_width + 10, button_height + 10)
+        obstacle_rect = game.create_rect(extra_x - 5, y - 5, button_width + 10, button_height + 10)
         
     else:
-        if extra_mode:
-            extra_text_color = settings.TEXT_HOVER_COLOR
+        if obstacle_mode:
+            obstacle_text_color = settings.TEXT_HOVER_COLOR
         else:
-            extra_text_color = settings.TEXT_COLOR
+            obstacle_text_color = settings.TEXT_COLOR
             
-        extra_color = settings.MENU_COLOR
-        extra_font = menu_font
+        obstacle_color = settings.MENU_COLOR
+        obstacle_font = menu_font
         
-    if extra_mode:
-        extra_text = "EXTRAS : ON"
+    if obstacle_mode:
+        obstacle_text = "OBSTACLES : ON"
     else:
-        extra_text = "EXTRAS : OFF"
+        obstacle_text = "OBSTACLES : OFF"
+        
+    if powerup_rect.collidepoint(mouse_pos):
+        powerup_color = settings.MENU_HOVER_COLOR
+        powerup_text_color = settings.TEXT_HOVER_COLOR
+        powerup_font = hover_font
+                        
+        powerup_rect = game.create_rect(
+            extra_x - 5, 
+            y - int(10*dh) - button_height - 5, 
+            button_width + 10, 
+            button_height + 10)
+        
+    else:
+        if powerup_mode:
+            powerup_text_color = settings.TEXT_HOVER_COLOR
+        else:
+            powerup_text_color = settings.TEXT_COLOR
+            
+        powerup_color = settings.MENU_COLOR
+        powerup_font = menu_font
+        
+    if powerup_mode:
+        powerup_text = "POWER UP : ON"
+    else:
+        powerup_text = "POWER UP : OFF"
         
     pygame.draw.rect(
         screen,
@@ -220,17 +246,25 @@ def draw_second_menu(screen, buttons, extra_mode, width, height, states):
     )
     pygame.draw.rect(
         screen,
-        extra_color,
-        extra_rect,
+        obstacle_color,
+        obstacle_rect,
+    )
+    pygame.draw.rect(
+        screen,
+        powerup_color,
+        powerup_rect,
     )
     
     return_text_surface, return_text_rect = game.create_text(return_font, "RETURN", return_text_color, return_rect)
-    extra_text_surface, extra_text_rect = game.create_text(extra_font, extra_text, extra_text_color, extra_rect)
+    obstacle_text_surface, obstacle_text_rect = game.create_text(obstacle_font, obstacle_text, obstacle_text_color, obstacle_rect)
+    powerup_text_surface, powerup_text_rect = game.create_text(powerup_font, powerup_text, powerup_text_color, powerup_rect)
         
     screen.blit(return_text_surface, return_text_rect)
-    screen.blit(extra_text_surface, extra_text_rect)
+    screen.blit(obstacle_text_surface, obstacle_text_rect)
+    screen.blit(powerup_text_surface, powerup_text_rect)
     
     buttons.append(("RETURN", return_rect))
-    buttons.append(("EXTRA", extra_rect))
+    buttons.append(("OBSTACLE", obstacle_rect))
+    buttons.append(("POWERUP", powerup_rect))
     
     return buttons

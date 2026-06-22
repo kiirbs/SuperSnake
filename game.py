@@ -149,7 +149,7 @@ def new_game(grid_size, max_food, food_interval, difficulty, mode):
     
     return players, food_pos, free_cases, food_interval, obstacles_pos, powerup_pos, text
 
-def new_extra_game(grid_size, food_pos, max_obstacles, max_powerup, difficulty, players):
+def new_obstacle_game(grid_size, food_pos, max_obstacles, players):
     
     powerup_pos = []
     obstacles_pos = []
@@ -195,7 +195,13 @@ def new_extra_game(grid_size, food_pos, max_obstacles, max_powerup, difficulty, 
             obstacle = next_obstacle
             obstacles_pos.append(obstacle)
             occupied_cases.append(obstacle)
-            
+    
+    return obstacles_pos, powerup_pos
+
+def new_powerup_game(grid_size, food_pos, max_powerup, difficulty, players, obstacles_pos):
+    
+    powerup_pos = []
+    
     for _ in range(max_powerup):
         powerup_pos.append(food.generate_powerup(
             grid_size,
@@ -207,7 +213,7 @@ def new_extra_game(grid_size, food_pos, max_obstacles, max_powerup, difficulty, 
                 
     powerup_interval = (max_powerup - 1) * difficulty["power_up_interval"] if max_powerup > 1 else 1
     
-    return obstacles_pos, powerup_pos, powerup_interval
+    return powerup_pos, powerup_interval
 
 def turn(next_direction, ingame_snake, grow):
     
@@ -339,13 +345,18 @@ def game_setup(difficulty):
     
     return selected_grid_size, max_food, food_interval, game_state, difficulty
 
-def extra_game_setup(difficulty):
+def obstacle_game_setup(difficulty):
     
     max_obstacles = difficulty["max_obstacles"]
+    
+    return max_obstacles
+
+def powerup_game_setup(difficulty):
+    
     max_powerup = difficulty["max_power_up"]
     powerup_interval = difficulty["power_up_interval"]
     
-    return max_obstacles, max_powerup, powerup_interval
+    return max_powerup, powerup_interval
 
 def create_rect(x, y, width, height):
     
