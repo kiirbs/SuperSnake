@@ -94,6 +94,8 @@ def draw_powerup(screen, pos, type, grid_offset_x, grid_offset_y, cell_size):
     
 def eat_food_check(player, players, grid_size, difficulty, game_state, obstacles_pos, food_pos, max_food, food_interval, mode):
     
+    text = None
+    
     if player["head"] in food_pos:
         player["score"] += 1
         player["grow"] = True
@@ -124,17 +126,15 @@ def eat_food_check(player, players, grid_size, difficulty, game_state, obstacles
                     
             if free_cases <= 0:
                 if mode == "SOLO":
-                    game_state = "WIN"
+                    game_state, text = "GAME_OVER", "YOU WIN"
                 else:
-                    game_state = "EGALITY"
+                    game_state, text = "GAME_OVER", "EGALITY"
                 audio.WIN_SOUND.play()
                         
-    return food_pos, max_food, food_interval, game_state
+    return food_pos, max_food, food_interval, game_state, text
 
-def eat_powerup_check(player, players, grid_size, difficulty, game_state, obstacles_pos, food_pos, max_food, powerup_pos, max_powerup, powerup_interval, mode):
-    
-    winner = None
-    
+def eat_powerup_check(player, players, grid_size, difficulty, game_state, obstacles_pos, food_pos, max_food, powerup_pos, max_powerup, powerup_interval, mode, text):
+        
     for powerup in powerup_pos:
                 
         if powerup is None:
@@ -150,13 +150,13 @@ def eat_powerup_check(player, players, grid_size, difficulty, game_state, obstac
                         
                 if len(player["snake"]) <= 0 or player["score"] < 0:
                     if mode == "SOLO":
-                        game_state = "GAME_OVER"
+                        game_state, text = "GAME_OVER", "GAME OVER"
                         audio.LOSE_SOUND.play()
                     else:
                         if player["name"] == "player_1":
-                            game_state, winner = "PLAYER_WIN", "P2"
+                            game_state, text = "GAME_OVER", "P2 WIN"
                         else:
-                            game_state, winner = "PLAYER_WIN", "P1"
+                            game_state, text = "GAME_OVER", "P1 WIN"
                         audio.WIN_SOUND.play()
                             
                 powerup_pos, max_powerup, powerup_interval = game.reset_powerup(
@@ -253,4 +253,4 @@ def eat_powerup_check(player, players, grid_size, difficulty, game_state, obstac
                     max_powerup
                 )
                 
-    return game_state, winner, powerup_pos, max_powerup, powerup_interval
+    return game_state, text, powerup_pos, max_powerup, powerup_interval

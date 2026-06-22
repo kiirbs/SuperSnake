@@ -33,7 +33,7 @@ max_powerup = difficulty["max_power_up"]
 powerup_interval = difficulty["power_up_interval"]
 highscores = save.load_highscores()
 players = []
-winner = None
+text = None
 
 width = screen.get_width()
 height = screen.get_height()
@@ -131,7 +131,7 @@ while running:
                     # New Game
                     grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
                     difficulty_name = difficulty["name"]                
-                    players, food_pos, free_cases, food_interval, obstacles_pos, powerup_pos, winner = game.new_game(
+                    players, food_pos, free_cases, food_interval, obstacles_pos, powerup_pos, text = game.new_game(
                         selected_grid_size, 
                         max_food, 
                         food_interval,
@@ -201,7 +201,7 @@ while running:
 
         # Eat food
         for p in players:
-            food_pos, max_food, food_interval, game_state = food.eat_food_check(
+            food_pos, max_food, food_interval, game_state, text = food.eat_food_check(
                 p,
                 players,
                 grid_size,
@@ -216,7 +216,7 @@ while running:
             
         # Eat Power Up
         for p in players:
-            game_state, winner, powerup_pos, max_powerup, powerup_interval = food.eat_powerup_check(
+            game_state, text, powerup_pos, max_powerup, powerup_interval = food.eat_powerup_check(
                 p, 
                 players,
                 grid_size, 
@@ -228,7 +228,8 @@ while running:
                 powerup_pos, 
                 max_powerup, 
                 powerup_interval,
-                mode
+                mode,
+                text
             )
         
         # Best Score Check
@@ -243,22 +244,24 @@ while running:
     
         # Grid-Out & Que-Eating & Multiplayer Collisions Check
         if mode != "SOLO":
-            game_state, winner = game.hit_player_check(
+            text, game_state = game.hit_player_check(
                 players[0]["head"], 
                 players[1]["head"], 
                 players[0]["snake"], 
-                players[1]["snake"]
-            ) 
+                players[1]["snake"],
+                game_state,
+                text
+            )
         for p in players:
             if game.grid_out_check(p["head"], grid_size) or game.eat_que_check(p["snake"], p["head"]) or p["snake_len"] <= 0:
                 if mode == "SOLO":
-                    game_state = "GAME_OVER"
+                    game_state, text = "GAME_OVER", "GAME OVER"
                     audio.LOSE_SOUND.play()
                 else:
                     if p["name"] == "player_1":
-                        game_state, winner = "PLAYER_WIN", "P2"
+                        game_state, text = "GAME_OVER", "P2 WIN"
                     else:
-                        game_state, winner = "PLAYER_WIN", "P1"
+                        game_state, text = "GAME_OVER", "P1 WIN"
                     audio.WIN_SOUND.play()
         
         # Hit-Obstacles Check
@@ -266,13 +269,13 @@ while running:
             for p in players:
                 if game.hit_obstacles_check(p["head"], obstacles_pos):
                     if mode == "SOLO":
-                        game_state = "GAME_OVER"
+                        game_state, text = "GAME_OVER", "GAME OVER"
                         audio.LOSE_SOUND.play()
                     else:
                         if p["name"] == "player_1":
-                            game_state, winner = "PLAYER_WIN", "P2"
+                            game_state, text = "GAME_OVER", "P2 WIN"
                         else:
-                            game_state, winner = "PLAYER_WIN", "P1"
+                            game_state, text = "GAME_OVER", "P1 WIN"
                         audio.WIN_SOUND.play()
 
         # Draw Grid
@@ -358,71 +361,15 @@ while running:
         
     elif game_state == "GAME_OVER":
         
-        # Set screen color
-        screen.fill(settings.BACKGROUND_COLOR)
-        
-        # Save Highscore
-        save.save_highscores(highscores)
-        
-        # Print GAME OVER
-        menu.print_game_result(screen, "GAME OVER", width, height)
-        
-        # Draw Score
-        for p in players:
-            game.draw_score(screen, p, width, height)
-        
-        # Buttons
-        buttons = menu.draw_game_over(screen, width, height)
-        
-        # Grid Size and Cell Size Check
-        grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
-        
-    elif game_state == "WIN":
-        # Set screen color
-        screen.fill(settings.BACKGROUND_COLOR)
-        
-        # Save Highscore
-        save.save_highscores(highscores)
-        
-        # Print YOU WIN
-        menu.print_game_result(screen, "YOU WIN", width, height)
-        
-        # Draw Score
-        for p in players:
-            game.draw_score(screen, p, width, height)
-        
-        # Buttons
-        buttons = menu.draw_game_over(screen, width, height)
-        
-        # Grid Size and Cell Size Check
-        grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
-        
-    elif game_state == "PLAYER_WIN":
-        # Set screen color
-        screen.fill(settings.BACKGROUND_COLOR)
-        
-        if winner == "P1":
-            text = "PLAYER 1 WIN"
-        elif winner == "P2":
-            text = "PLAYER 2 WIN"
-        else:
-            text = "EQUALITY"
-        
-        # Save Highscore
-        save.save_highscores(highscores)
-        
-        # Print YOU WIN
-        menu.print_game_result(screen, text, width, height)
-        
-        # Draw Score
-        for p in players:
-            game.draw_score(screen, p, width, height)
-        
-        # Buttons
-        buttons = menu.draw_game_over(screen, width, height)
-        
-        # Grid Size and Cell Size Check
-        grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
+        buttons, grid_size, cell_size = game.end_game(
+            screen, 
+            highscores, 
+            players, 
+            width, 
+            height, 
+            selected_grid_size, 
+            text
+        )
         
     # Print
     pygame.display.flip()

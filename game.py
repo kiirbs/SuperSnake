@@ -1,12 +1,14 @@
 import random
 import pygame
 
+import game
 import snake
 import food
 import settings
 import menu
 import grid
 import audio
+import save
 
 def cell_size_check(selected_grid_size, width, height):
     
@@ -143,9 +145,9 @@ def new_game(grid_size, max_food, food_interval, difficulty, mode):
     free_cases = free_case_check(grid_size, max_food, players)
     
     # Winner
-    winner = None
+    text = None
     
-    return players, food_pos, free_cases, food_interval, obstacles_pos, powerup_pos, winner
+    return players, food_pos, free_cases, food_interval, obstacles_pos, powerup_pos, text
 
 def new_extra_game(grid_size, food_pos, max_obstacles, max_powerup, difficulty, players):
     
@@ -309,21 +311,24 @@ def hit_obstacles_check(head, obstacles_pos):
     
     return False
 
-def hit_player_check(head1, head2, snake1, snake2):
+def hit_player_check(head1, head2, snake1, snake2, game_state, text):
     
     if head1 == head2:
         audio.LOSE_SOUND.play()
-        return "PLAYER_WIN", None
+        game_state = "GAME_OVER"
+        return "EGALITY", game_state
     
     if head1 in snake2:
         audio.WIN_SOUND.play()
-        return "PLAYER_WIN", "P2"
+        game_state = "GAME_OVER"
+        return "P2 WIN", game_state
     
     if head2 in snake1:
         audio.WIN_SOUND.play()
-        return "PLAYER_WIN", "P1"
+        game_state = "GAME_OVER"
+        return "P1 WIN", game_state
     
-    return "GAME", None
+    return text, game_state
 
 def game_setup(difficulty):
     
@@ -434,4 +439,26 @@ def draw_score(screen, player, width, height):
     screen.blit(best_score_text_surface, best_score_text_rect)
     screen.blit(speed_text_surface, speed_text_rect)
     screen.blit(snake_len_text_surface, snake_len_text_rect)
+    
+def end_game(screen, highscores, players, width, height, selected_grid_size, text):
+    # Set screen color
+    screen.fill(settings.BACKGROUND_COLOR)
+        
+    # Save Highscore
+    save.save_highscores(highscores)
+        
+    # Print GAME OVER
+    menu.print_game_result(screen, text, width, height)
+        
+    # Draw Score
+    for p in players:
+        game.draw_score(screen, p, width, height)
+        
+    # Buttons
+    buttons = menu.draw_game_over(screen, width, height)
+        
+    # Grid Size and Cell Size Check
+    grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
+    
+    return buttons, grid_size, cell_size
     
