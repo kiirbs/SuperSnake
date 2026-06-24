@@ -9,6 +9,7 @@ import grid
 import menu
 import save
 import audio
+import bot
 
 # Pygame Setup
 pygame.init()
@@ -26,6 +27,7 @@ game_state = "MENU"
 mode = "SOLO"
 obstacle_mode = False
 powerup_mode = False
+bot_mode = False
 best_score = 0
 difficulty = settings.NORMAL
 difficulty_name = difficulty["name"]
@@ -141,6 +143,9 @@ while running:
                         
                     elif value == "POWERUP":
                         powerup_mode = False if powerup_mode else True
+                        
+                    elif value == "BOT":
+                        bot_mode = False if bot_mode else True
                     
                     # New Game
                     grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
@@ -150,7 +155,8 @@ while running:
                         max_food, 
                         food_interval,
                         difficulty,
-                        mode
+                        mode,
+                        bot_mode
                     )
                     if obstacle_mode:
                         obstacles_pos, powerup_pos = game.new_obstacle_game(
@@ -190,6 +196,8 @@ while running:
         # Draw Difficulty Menu   
         buttons = menu.draw_menu(screen, width, height, settings.DIFFICULT)
         buttons = menu.draw_second_menu(screen, buttons, obstacle_mode, powerup_mode, width, height, settings.DIFFICULT)
+        if mode != "SOLO":
+            buttons = menu.draw_bot_menu(screen, buttons, bot_mode, width, height, settings.DIFFICULT)
         
         # Grid Size and Cell Size Check
         grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
@@ -218,6 +226,17 @@ while running:
         # Move
         for p in players:
             if p["snake_len"] > 0:
+                if p["name"] == "bot":
+                    
+                    p["next_direction"] = bot.update_bot_direction(
+                        p, 
+                        food_pos, 
+                        obstacles_pos, 
+                        powerup_pos, 
+                        players, 
+                        grid_size
+                    )
+                    
                 game.move(p)
 
         # Eat food

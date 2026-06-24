@@ -1,3 +1,5 @@
+import pygame
+
 DEFAULT_GRID_SIZE = 20
 
 # Title Space
@@ -12,8 +14,8 @@ DEFAULT_BUTTON_MIN_HEIGHT = 25
 DEFAULT_BUTTON_MIN_MARGE = 5
 
 # Return and Extra Button
-DEFAULT_BUTTON2_WIDTH = 200
-DEFAULT_BUTTON2_HEIGHT = 40
+DEFAULT_BUTTON2_WIDTH = 250
+DEFAULT_BUTTON2_HEIGHT = 50
 DEFAULT_BUTTON2_MIN_WIDTH = 50
 DEFAULT_BUTTON2_MIN_HEIGHT = 12
 
@@ -125,3 +127,37 @@ BONUS_COLOR = (106, 13, 173)
 
 # Fps
 FPS = 60
+
+# Controls
+SOLO_CONTROLS = {
+    pygame.K_UP: "UP",
+    pygame.K_z: "UP",
+    pygame.K_o: "UP",
+    pygame.K_LEFT: "LEFT",
+    pygame.K_q: "LEFT",
+    pygame.K_k: "LEFT",
+    pygame.K_DOWN: "DOWN",
+    pygame.K_s: "DOWN",
+    pygame.K_l: "DOWN",
+    pygame.K_RIGHT: "RIGHT",
+    pygame.K_d: "RIGHT",
+    pygame.K_m: "RIGHT"
+}
+
+MULTI_P1_CONTROLS = {
+    pygame.K_z: "UP",
+    pygame.K_q: "LEFT",
+    pygame.K_s: "DOWN",
+    pygame.K_d: "RIGHT"
+}
+
+MULTI_P2_CONTROLS = {
+    pygame.K_UP: "UP",
+    pygame.K_o: "UP",
+    pygame.K_LEFT: "LEFT",
+    pygame.K_k: "LEFT",
+    pygame.K_DOWN: "DOWN",
+    pygame.K_l: "DOWN",
+    pygame.K_RIGHT: "RIGHT",
+    pygame.K_m: "RIGHT"
+}

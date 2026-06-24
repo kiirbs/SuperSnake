@@ -80,22 +80,13 @@ def create_player(grid_size, difficulty, controls, name):
     
     return player
 
-def new_game(grid_size, max_food, food_interval, difficulty, mode):
+def new_game(grid_size, max_food, food_interval, difficulty, mode, bot_mode):
     
     if mode == "SOLO":
         player = create_player(
             grid_size,
             difficulty,
-            {
-                pygame.K_UP: "UP",
-                pygame.K_z: "UP",
-                pygame.K_LEFT: "LEFT",
-                pygame.K_q: "LEFT",
-                pygame.K_DOWN: "DOWN",
-                pygame.K_s: "DOWN",
-                pygame.K_RIGHT: "RIGHT",
-                pygame.K_d: "RIGHT"
-            },
+            settings.SOLO_CONTROLS,
             "player_1"
         )
         players = [player]
@@ -103,28 +94,14 @@ def new_game(grid_size, max_food, food_interval, difficulty, mode):
         player1 = create_player(
             grid_size,
             difficulty,
-            {
-                pygame.K_z: "UP",
-                pygame.K_q: "LEFT",
-                pygame.K_s: "DOWN",
-                pygame.K_d: "RIGHT"
-            },
+            settings.SOLO_CONTROLS if bot_mode else settings.MULTI_P1_CONTROLS,
             "player_1"
         )
         player2 = create_player(
             grid_size,
             difficulty,
-            {
-                pygame.K_UP: "UP",
-                pygame.K_o: "UP",
-                pygame.K_LEFT: "LEFT",
-                pygame.K_k: "LEFT",
-                pygame.K_DOWN: "DOWN",
-                pygame.K_l: "DOWN",
-                pygame.K_RIGHT: "RIGHT",
-                pygame.K_m: "RIGHT"
-            },
-            "player_2"
+            {} if bot_mode else settings.MULTI_P2_CONTROLS,
+            "bot" if bot_mode else "player_2"
         )
         players = [player1, player2]
     
