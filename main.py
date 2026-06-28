@@ -213,15 +213,13 @@ while running:
         
         # Moving Interval
         for p in players:
+            
             p["move_timer"] += dt
+            
             if p["snake_len"] > 0:
                 p["head"] = p["snake"][0]
-            p["speed_end_timer"], p["move_interval"] = game.speed_timer(
-                p["speed_end_timer"],
-                p["move_interval"],
-                p["old_move_interval"],
-                dt
-            )
+            
+            game.update_effects(p, dt)
 
         # Move
         for p in players:
@@ -236,7 +234,6 @@ while running:
                         players, 
                         grid_size
                     )
-                    
                 game.move(p)
 
         # Eat food

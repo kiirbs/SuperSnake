@@ -64,6 +64,41 @@ GAME_OVER = [
     "RETURN TO MENU"
 ]
 
+POSSIBLE_EFFECTS = ["POISON", "FREEZE", "SPEED", "SCORE_UP", "SCORE_DOWN", "GROW"]
+
+EFFECTS = {
+    "SPEED" : {
+        "duration" : 5,
+        "boost": 0.75,
+        "color": (253, 216, 8)
+    }, 
+    "SCORE_UP": {
+        "duration" : 1,
+        "boost" : 5,
+        "color": (8, 146, 208)
+    }, 
+    "GROW" : {
+        "duration" : 5,
+        "boost" : 5,
+        "color": (106, 13, 173)
+    },
+    "POISON": {
+        "duration" : 1,
+        "boost": 1,
+        "color": (121, 6, 4)
+    }, 
+    "FREEZE": {
+        "duration" : 5,
+        "boost": 1.25,
+        "color": (214, 234, 240)
+    }, 
+    "SCORE_DOWN": {
+        "duration" : 1,
+        "boost": 5,
+        "color": (255, 69, 0)
+    }
+}
+
 # Difficulties
 EASY = {
     "name": "EASY",

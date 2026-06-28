@@ -41,9 +41,7 @@ def draw_food(screen, food_pos, grid_offset_x, grid_offset_y, cell_size):
         )
     
 def generate_powerup(grid_size, food_pos, powerup_pos, obstacles_pos, players):
-    
-    possible_effect = ["POISON", "SPEED", "SCORE", "BONUS"]
-    
+        
     possible_powerup_pos = [
         [i, j]
         for i in range(grid_size) 
@@ -62,7 +60,7 @@ def generate_powerup(grid_size, food_pos, powerup_pos, obstacles_pos, players):
     
     powerup = {
         "pos": random.choice(possible_powerup_pos),
-        "type": random.choice(possible_effect)
+        "type": random.choice(settings.POSSIBLE_EFFECTS)
     }
     
     return powerup
@@ -72,14 +70,7 @@ def draw_powerup(screen, pos, type, grid_offset_x, grid_offset_y, cell_size):
     row = pos[0]
     col = pos[1]
     
-    if type == "POISON":
-        color = settings.POISON_COLOR
-    if type == "SPEED":
-        color = settings.SPEED_COLOR
-    if type == "SCORE":
-        color = settings.SCORE_UP_COLOR
-    if type == "BONUS":
-        color = settings.BONUS_COLOR
+    color = settings.EFFECTS[type]["color"]
     
     pygame.draw.rect(
             screen,
@@ -100,12 +91,7 @@ def eat_food_check(player, players, grid_size, difficulty, game_state, obstacles
         player["score"] += 1
         player["grow"] = True
         free_cases = game.free_case_check(grid_size, max_food, players)
-        player["move_interval"], player["old_move_interval"], player["speed_limit"] = game.speed_adjustment(
-            player["score"], 
-            player["speed_limit"], 
-            player["move_interval"], 
-            player["old_move_interval"]
-        )
+        game.speed_adjustment(player)
         audio.FOOD_SOUND.play()
                 
         # Generate Food
@@ -133,124 +119,136 @@ def eat_food_check(player, players, grid_size, difficulty, game_state, obstacles
                         
     return food_pos, max_food, food_interval, game_state, text
 
-def eat_powerup_check(player, players, grid_size, difficulty, game_state, obstacles_pos, food_pos, max_food, powerup_pos, max_powerup, powerup_interval, mode, text):
+def apply_poison(player):
+                
+    player["score"] = (
+        player["score"] - settings.EFFECTS["POISON"]["boost"]
+        if player["score"] > settings.EFFECTS["POISON"]["boost"]
+        else 0
+    )
+    player["snake"].pop()
+    audio.POISON_SOUND.play()
+    
+def apply_speed(player):
+    
+    player["score"] += 1
+    player["grow"] = True
+    audio.POWERUP_SOUND.play()
         
+    for effect in player["effects"]:
+        if effect["type"] == "SPEED":
+            effect["remaining"] = settings.EFFECTS["SPEED"]["duration"]
+            return
+        
+    player["effects"].append({
+        "type": "SPEED",
+        "remaining": settings.EFFECTS["SPEED"]["duration"]
+    })
+    player["move_interval"] *= settings.EFFECTS["SPEED"]["boost"]
+    
+def apply_freeze(player):
+    
+    player["score"] += 1
+    player["grow"] = True
+    audio.POWERUP_SOUND.play()
+                        
+    for effect in player["effects"]:
+        if effect["type"] == "FREEZE":
+            effect["remaining"] = settings.EFFECTS["FREEZE"]["duration"]
+            return
+        
+    player["effects"].append({
+        "type": "FREEZE",
+        "remaining": settings.EFFECTS["FREEZE"]["duration"]
+    })
+    player["move_interval"] *= settings.EFFECTS["FREEZE"]["boost"]
+    
+def apply_score_up(player):
+    
+    player["effects"].append({
+        "type": "SCORE_UP",
+        "remaining": settings.EFFECTS["SCORE_UP"]["duration"]
+    })
+                
+    player["score"] += settings.EFFECTS["SCORE_UP"]["boost"]
+    player["grow"] = True
+    audio.POWERUP_SOUND.play()
+    
+def apply_score_down(player):
+    
+    player["effects"].append({
+        "type": "SCORE_DOWN",
+        "remaining": settings.EFFECTS["SCORE_DOWN"]["duration"]
+    })
+                
+    player["score"] = (
+        player["score"] - settings.EFFECTS["SCORE_DOWN"]["boost"] 
+        if player["score"] > settings.EFFECTS["SCORE_DOWN"]["boost"] 
+        else 0
+    )
+    player["grow"] = True
+    audio.POWERUP_SOUND.play()
+    
+def apply_grow(player):
+    
+    player["effects"].append({
+        "type": "GROW",
+        "remaining": settings.EFFECTS["GROW"]["duration"]
+    })
+                
+    player["score"] += 1
+    
+APPLY_EFFECT = {
+    "SPEED": apply_speed,
+    "FREEZE": apply_freeze,
+    "POISON": apply_poison,
+    "GROW": apply_grow,
+    "SCORE_UP": apply_score_up,
+    "SCORE_DOWN": apply_score_down,
+}
+
+def eat_powerup_check(player, players, grid_size, difficulty, game_state, obstacles_pos, food_pos, max_food, powerup_pos, max_powerup, powerup_interval, mode, text):
+    
     for powerup in powerup_pos:
                 
         if powerup is None:
             continue
                     
         if player["head"] == powerup["pos"]:
+            
+            effect = powerup["type"]
             free_cases = game.free_case_check(grid_size, max_food, players)
                     
-            if powerup["type"] == "POISON":
-                player["score"] -= 1
-                player["snake"].pop()
-                audio.POISON_SOUND.play()
-                        
-                if len(player["snake"]) <= 0 or player["score"] < 0:
-                    if mode == "SOLO":
-                        game_state, text = "GAME_OVER", "GAME OVER"
-                        audio.LOSE_SOUND.play()
-                    else:
-                        if player["name"] == "player_1":
-                            game_state, text = "GAME_OVER", "P2 WIN"
-                        else:
-                            game_state, text = "GAME_OVER", "P1 WIN"
-                        audio.WIN_SOUND.play()
-                            
-                powerup_pos, max_powerup, powerup_interval = game.reset_powerup(
-                    players,
-                    player["head"], 
-                    food_pos, 
-                    powerup_pos,
-                    powerup_interval, 
-                    obstacles_pos, 
-                    grid_size, 
-                    difficulty, 
-                    free_cases, 
-                    max_powerup
-                )
-                            
-            elif powerup["type"] == "SPEED":
-                player["score"] += 1
-                player["grow"] = True
-                audio.POWERUP_SOUND.play()
-                        
-                if player["speed_end_timer"] <= 0:
-                    player["old_move_interval"] = player["move_interval"]
-                    player["move_interval"] *= 0.75
-                    player["speed_end_timer"] = 5
+            effect_func = APPLY_EFFECT.get(effect)
+
+            if effect_func:
+                effect_func(player)
+            
+            if effect != "POISON" and effect != "SCORE_DOWN":
+                game.speed_adjustment(player)
+            
+            if len(player["snake"]) <= 0 or player["score"] < 0:
+                if mode == "SOLO":
+                    game_state, text = "GAME_OVER", "GAME OVER"
+                    audio.LOSE_SOUND.play()
                 else:
-                    player["speed_end_timer"] = 5
-                        
-                player["move_interval"], player["old_move_interval"], player["speed_limit"] = game.speed_adjustment(
-                    player["score"], 
-                    player["speed_limit"], 
-                    player["move_interval"], 
-                    player["old_move_interval"]
-                )
-                powerup_pos, max_powerup, powerup_interval = game.reset_powerup(
-                    players,
-                    player["head"], 
-                    food_pos, 
-                    powerup_pos, 
-                    powerup_interval,
-                    obstacles_pos, 
-                    grid_size, 
-                    difficulty, 
-                    free_cases, 
-                    max_powerup
-                )       
-                        
-            elif powerup["type"] == "SCORE":
-                player["score"] += 5
-                player["grow"] = True
-                audio.POWERUP_SOUND.play()
-                        
-                player["move_interval"], player["old_move_interval"], player["speed_limit"] = game.speed_adjustment(
-                    player["score"], 
-                    player["speed_limit"], 
-                    player["move_interval"], 
-                    player["old_move_interval"]
-                )
-                powerup_pos, max_powerup, powerup_interval = game.reset_powerup(
-                    players,
-                    player["head"],
-                    food_pos, 
-                    powerup_pos, 
-                    powerup_interval,
-                    obstacles_pos, 
-                    grid_size, 
-                    difficulty, 
-                    free_cases, 
-                    max_powerup
-                )
-                        
-            elif powerup["type"] == "BONUS":
-                player["score"] += 1
-                player["grow"] = True
-                player["bonus_grow"] = True
-                player["bonus_timer"] = 5
-                audio.POWERUP_SOUND.play()
-                        
-                player["move_interval"], player["old_move_interval"], player["speed_limit"] = game.speed_adjustment(
-                    player["score"], 
-                    player["speed_limit"], 
-                    player["move_interval"], 
-                    player["old_move_interval"]
-                )
-                powerup_pos, max_powerup, powerup_interval = game.reset_powerup(
-                    players,
-                    player["head"],
-                    food_pos, 
-                    powerup_pos, 
-                    powerup_interval,
-                    obstacles_pos, 
-                    grid_size, 
-                    difficulty, 
-                    free_cases, 
-                    max_powerup
-                )
+                    if player["name"] == "player_1":
+                        game_state, text = "GAME_OVER", "P2 WIN"
+                    else:
+                        game_state, text = "GAME_OVER", "P1 WIN"
+                    audio.WIN_SOUND.play()
+                
+            powerup_pos, max_powerup, powerup_interval = game.reset_powerup(
+                players,
+                player["head"], 
+                food_pos, 
+                powerup_pos, 
+                powerup_interval,
+                obstacles_pos, 
+                grid_size, 
+                difficulty, 
+                free_cases, 
+                max_powerup
+            ) 
                 
     return game_state, text, powerup_pos, max_powerup, powerup_interval

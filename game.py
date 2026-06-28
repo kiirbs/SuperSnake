@@ -35,14 +35,11 @@ def free_case_check(grid_size, max_food, players):
         
     return grid_len - snake_len - max_food
 
-def speed_adjustment(score, speed_limit, move_interval, old_move_interval):
+def speed_adjustment(player):
     
-    while score >= speed_limit:
-        move_interval *= 0.98
-        old_move_interval *= 0.98
-        speed_limit += 5
-        
-    return move_interval, old_move_interval, speed_limit
+    while player["score"] >= player["speed_limit"]:
+        player["base_move_interval"] *= 0.98
+        player["speed_limit"] += 5
 
 def create_player(grid_size, difficulty, controls, name):
     
@@ -65,12 +62,10 @@ def create_player(grid_size, difficulty, controls, name):
         "grow": False,
         
         "move_timer": 0,
+        "base_move_interval": difficulty["move_interval"],
         "move_interval": difficulty["move_interval"],
-        "old_move_interval": 0,
         
-        "speed_end_timer": 0,
-        "bonus_timer": 0,
-        "bonus_grow": False,
+        "effects": [],
         
         "speed": round(1 / difficulty["move_interval"], 1),
         "snake_len": len(new_snake),
@@ -108,7 +103,7 @@ def new_game(grid_size, max_food, food_interval, difficulty, mode, bot_mode):
     # Obstacles
     obstacles_pos = []
     
-    # Power Up
+    # Power Up & Down
     powerup_pos = []
     
     # Food
@@ -217,26 +212,45 @@ def update_player(player):
 def move(player):
     
     if player["move_timer"] >= player["move_interval"]:
+
         player["move_timer"] = 0
+
+        if has_effect(player, "GROW"):
             
-        if player["bonus_grow"]:
             player["grow"] = True
-            player["bonus_timer"] -= 1
-                
-            if player["bonus_timer"] <= 0:
-                player["bonus_grow"] = False
-                    
+            
+            for effect in player["effects"]:
+                effect["remaining"] -= 1
+
+                if effect["remaining"] <= 0:
+                    player["effects"].remove(effect)
+
         update_player(player)
 
-def speed_timer(speed_end_timer, move_interval, old_move_interval, dt):
+def has_effect(player, effect_type):
+
+    return any(
+        effect["type"] == effect_type
+        for effect in player["effects"]
+    )
+
+def update_effects(player, dt):
     
-    if speed_end_timer > 0:
-            speed_end_timer -= dt
-            
-            if speed_end_timer <= 0:
-                move_interval = old_move_interval
-                
-    return speed_end_timer, move_interval
+    player["move_interval"] = player["base_move_interval"]
+    
+    for effect in player["effects"][:]:
+
+        effect["remaining"] -= dt
+
+        if effect["remaining"] <= 0:
+            player["effects"].remove(effect)
+            continue
+
+        if effect["type"] == "SPEED":
+            player["move_interval"] *= settings.EFFECTS["SPEED"]["boost"]
+
+        elif effect["type"] == "FREEZE":
+            player["move_interval"] *= settings.EFFECTS["FREEZE"]["boost"]
 
 def reset_powerup(players, head, food_pos, powerup_pos, powerup_interval, obstacles_pos, grid_size, difficulty, free_cases, max_powerup):
     
