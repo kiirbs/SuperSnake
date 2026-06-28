@@ -17,7 +17,7 @@ First python project, remaster snake.
 - [X] Difficultés
 - [X] One Board Multi
 - [ ] Two Board Multi
-- [ ] Bot
+- [X] Bot
 
 ## Améliorations
 

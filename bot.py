@@ -1,6 +1,8 @@
 import random
 from collections import deque
+from copy import deepcopy
 
+# Anticipating the opp's movement
 def get_opp_head(players, blocked):
     
     enemy = next(
@@ -24,6 +26,7 @@ def get_opp_head(players, blocked):
         
     return blocked
 
+# Check blocked cases
 def get_blocked_cases(players, obstacles_pos):
 
     blocked = set()
@@ -57,10 +60,9 @@ def get_blocked_cases(players, obstacles_pos):
 
     return blocked
 
-def find_path_bfs(start, target, players, obstacles_pos, grid_size):
+# Breadth First Search
+def find_path_bfs(start, target, grid_size, blocked):
     
-    blocked = get_blocked_cases(players, obstacles_pos)
-
     queue = deque([start])
 
     visited = {start}
@@ -121,19 +123,21 @@ def find_path_bfs(start, target, players, obstacles_pos, grid_size):
 
     return None
 
-def check_best_path(head, food_pos, powerup_pos, players, obstacles_pos, grid_size):
+# Check best path
+def get_best_path(head, food_pos, powerup_pos, players, obstacles_pos, grid_size):
     
     best_item = None
     best_path = None
+    
+    blocked = get_blocked_cases(players, obstacles_pos)
 
     for food in food_pos:
 
         path = find_path_bfs(
             tuple(head),
             tuple(food),
-            players,
-            obstacles_pos,
-            grid_size
+            grid_size,
+            blocked
         )
 
         if path is None:
@@ -154,9 +158,8 @@ def check_best_path(head, food_pos, powerup_pos, players, obstacles_pos, grid_si
         path = find_path_bfs(
             tuple(head),
             tuple(powerup["pos"]),
-            players,
-            obstacles_pos,
-            grid_size
+            grid_size,
+            blocked
         )
 
         if path is None:
@@ -168,6 +171,56 @@ def check_best_path(head, food_pos, powerup_pos, players, obstacles_pos, grid_si
             
     return best_path, best_item
 
+# Game simulation
+def simulate_game_state(path, snake, grow, best_item):
+        
+    for case in path:
+    
+        snake.appendleft(list(case))
+            
+        if list(case) == best_item: # Dernier element de path -> food
+            grow = True
+            
+        if not grow:
+            snake.pop()
+        else:
+            grow = False
+        
+    return snake, grow
+
+# Check back way
+def get_back_path(best_item, players, obstacles_pos, grid_size, path):
+    
+    back_path = None
+    queue = None
+    
+    players_simulation = deepcopy(players)
+    
+    for p in players_simulation:
+        
+        if p["name"] == "bot":
+            
+            p["snake"], p["grow"] = simulate_game_state(
+                path, 
+                p["snake"], 
+                p["grow"],
+                best_item
+            )
+            p["head"] = p["snake"][0]
+            queue = p["snake"][len(p["snake"]) - 1]
+            
+    blocked = get_blocked_cases(players_simulation, obstacles_pos)
+            
+    back_path = find_path_bfs(
+        tuple(p["head"]),
+        tuple(queue),
+        grid_size,
+        blocked
+    )
+    
+    return back_path
+
+# Get direction
 def get_next_direction(head, path):
     
     if not path:
@@ -190,6 +243,7 @@ def get_next_direction(head, path):
     if dy == -1:
         return "UP"
 
+# Check possible directions
 def get_possible_direction(head_x, head_y, direction, obstacles_pos, players, grid_size):
     
     directions = ["UP", "LEFT", "DOWN", "RIGHT"]
@@ -239,22 +293,57 @@ def get_possible_direction(head_x, head_y, direction, obstacles_pos, players, gr
             
     return directions
 
+# Bot main
 def update_bot_direction(bot, food_pos, obstacles_pos, powerup_pos, players, grid_size):
         
     next_direction = None
     direction = bot["direction"]
     
+    possible_foods = food_pos.copy()
+    possible_powerups = powerup_pos.copy()
+    
+    back_path = None
+    
     head_x = bot["head"][0]
     head_y = bot["head"][1]
     
-    best_path, best_item = check_best_path(
-        bot["head"], 
-        food_pos, 
-        powerup_pos, 
-        players, 
-        obstacles_pos, 
-        grid_size
-    )
+    while True:
+    
+        best_path, best_item = get_best_path(
+            bot["head"], 
+            possible_foods, 
+            possible_powerups, 
+            players, 
+            obstacles_pos, 
+            grid_size
+        )
+        
+        if best_item is None:
+            break
+    
+        back_path = get_back_path(
+            best_item,
+            players,
+            obstacles_pos,
+            grid_size,
+            best_path
+        )
+        
+        if back_path is None:
+            if best_item in possible_foods:
+                possible_foods.remove(best_item)
+                
+            for powerup in possible_powerups:
+                if best_item == powerup["pos"]:
+                    possible_powerups.remove(powerup)      
+        else:
+            break
+        
+        if best_item is None:
+            break
+        
+        if len(possible_foods) <= 0 and len(possible_powerups) <= 0:
+            break
     
     next_direction = get_next_direction(bot["head"], best_path)
     
