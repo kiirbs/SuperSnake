@@ -120,12 +120,11 @@ def eat_food_check(player, players, grid_size, difficulty, game_state, obstacles
     return food_pos, max_food, food_interval, game_state, text
 
 def apply_poison(player):
-                
-    player["score"] = (
-        player["score"] - settings.EFFECTS["POISON"]["boost"]
-        if player["score"] > settings.EFFECTS["POISON"]["boost"]
-        else 0
-    )
+    
+    player["effects"].append({
+        "type": "POISON",
+        "remaining": settings.EFFECTS["POISON"]["duration"]
+    })
     player["snake"].pop()
     audio.POISON_SOUND.play()
     
@@ -144,7 +143,6 @@ def apply_speed(player):
         "type": "SPEED",
         "remaining": settings.EFFECTS["SPEED"]["duration"]
     })
-    player["move_interval"] *= settings.EFFECTS["SPEED"]["boost"]
     
 def apply_freeze(player):
     
@@ -161,7 +159,6 @@ def apply_freeze(player):
         "type": "FREEZE",
         "remaining": settings.EFFECTS["FREEZE"]["duration"]
     })
-    player["move_interval"] *= settings.EFFECTS["FREEZE"]["boost"]
     
 def apply_score_up(player):
     
@@ -169,9 +166,6 @@ def apply_score_up(player):
         "type": "SCORE_UP",
         "remaining": settings.EFFECTS["SCORE_UP"]["duration"]
     })
-                
-    player["score"] += settings.EFFECTS["SCORE_UP"]["boost"]
-    player["grow"] = True
     audio.POWERUP_SOUND.play()
     
 def apply_score_down(player):
@@ -180,13 +174,6 @@ def apply_score_down(player):
         "type": "SCORE_DOWN",
         "remaining": settings.EFFECTS["SCORE_DOWN"]["duration"]
     })
-                
-    player["score"] = (
-        player["score"] - settings.EFFECTS["SCORE_DOWN"]["boost"] 
-        if player["score"] > settings.EFFECTS["SCORE_DOWN"]["boost"] 
-        else 0
-    )
-    player["grow"] = True
     audio.POWERUP_SOUND.play()
     
 def apply_grow(player):
@@ -195,8 +182,6 @@ def apply_grow(player):
         "type": "GROW",
         "remaining": settings.EFFECTS["GROW"]["duration"]
     })
-                
-    player["score"] += 1
     
 APPLY_EFFECT = {
     "SPEED": apply_speed,

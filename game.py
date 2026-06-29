@@ -40,6 +40,13 @@ def speed_adjustment(player):
     while player["score"] >= player["speed_limit"]:
         player["base_move_interval"] *= 0.98
         player["speed_limit"] += 5
+        
+def has_effect(player, effect_type):
+
+    return any(
+        effect["type"] == effect_type
+        for effect in player["effects"]
+    )
 
 def create_player(grid_size, difficulty, controls, name):
     
@@ -215,11 +222,23 @@ def move(player):
 
         player["move_timer"] = 0
 
-        if has_effect(player, "GROW"):
-            
-            player["grow"] = True
-            
-            for effect in player["effects"]:
+        for effect in player["effects"][:]:
+            if (
+                effect["type"] == "GROW" 
+                or effect["type"] == "POISON" 
+                or effect["type"] == "SCORE_UP" 
+                or effect["type"] == "SCORE_DOWN"
+            ):
+                if effect["remaining"] == 1:
+                    player["score"] = (
+                        player["score"] + settings.EFFECTS[effect["type"]]["boost"] 
+                        if player["score"] > -(settings.EFFECTS[effect["type"]]["boost"])
+                        else 0
+                    )
+                    
+                if effect["type"] != "POISON":
+                    player["grow"] = True
+
                 effect["remaining"] -= 1
 
                 if effect["remaining"] <= 0:
@@ -227,30 +246,20 @@ def move(player):
 
         update_player(player)
 
-def has_effect(player, effect_type):
-
-    return any(
-        effect["type"] == effect_type
-        for effect in player["effects"]
-    )
-
 def update_effects(player, dt):
     
     player["move_interval"] = player["base_move_interval"]
     
     for effect in player["effects"][:]:
+        if effect["type"] == "SPEED" or effect["type"] == "FREEZE":
 
-        effect["remaining"] -= dt
+            effect["remaining"] -= dt
 
-        if effect["remaining"] <= 0:
-            player["effects"].remove(effect)
-            continue
+            if effect["remaining"] <= 0:
+                player["effects"].remove(effect)
+                continue
 
-        if effect["type"] == "SPEED":
-            player["move_interval"] *= settings.EFFECTS["SPEED"]["boost"]
-
-        elif effect["type"] == "FREEZE":
-            player["move_interval"] *= settings.EFFECTS["FREEZE"]["boost"]
+            player["move_interval"] *= settings.EFFECTS[effect["type"]]["boost"]
 
 def reset_powerup(players, head, food_pos, powerup_pos, powerup_interval, obstacles_pos, grid_size, difficulty, free_cases, max_powerup):
     
