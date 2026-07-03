@@ -3,6 +3,7 @@ import random
 
 import game
 import audio
+import assets
 import settings
 
 def generate_food(grid_size, food_pos, obstacles_pos, players):
@@ -29,16 +30,18 @@ def draw_food(screen, food_pos, grid_offset_x, grid_offset_y, cell_size):
     food_row = food_pos[0]
     food_col = food_pos[1]
     
-    pygame.draw.rect(
-            screen,
-            settings.FOOD_COLOR,
-            (
-                grid_offset_x + food_row * cell_size + 1,
-                grid_offset_y + food_col * cell_size + 1,
-                cell_size - 2,
-                cell_size - 2
-            )
+    sprite = assets.get_sprites(
+        assets.FOOD,
+        cell_size
+    )
+    
+    screen.blit(
+        sprite,
+        (
+            grid_offset_x + food_row * cell_size,
+            grid_offset_y + food_col * cell_size
         )
+    )
     
 def generate_powerup(grid_size, food_pos, powerup_pos, obstacles_pos, players):
         
@@ -70,18 +73,18 @@ def draw_powerup(screen, pos, type, grid_offset_x, grid_offset_y, cell_size):
     row = pos[0]
     col = pos[1]
     
-    color = settings.EFFECTS[type]["color"]
+    sprite = assets.get_sprites(
+        assets.POWERUPS[type],
+        cell_size
+    )
     
-    pygame.draw.rect(
-            screen,
-            color,
-            (
-                grid_offset_x + row * cell_size + 1,
-                grid_offset_y + col * cell_size + 1,
-                cell_size - 2,
-                cell_size - 2
-            )
+    screen.blit(
+        sprite,
+        (
+            grid_offset_x + row * cell_size,
+            grid_offset_y + col * cell_size
         )
+    )
     
 def eat_food_check(player, players, grid_size, difficulty, game_state, obstacles_pos, food_pos, max_food, food_interval, mode):
     

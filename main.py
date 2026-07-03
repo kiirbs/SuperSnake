@@ -2,6 +2,7 @@ import pygame
 from collections import deque
 
 import settings
+import assets
 import food
 import snake
 import game
@@ -18,6 +19,7 @@ screen = pygame.display.set_mode(
     (settings.DEFAULT_WIDTH, settings.DEFAULT_HEIGHT),
     pygame.RESIZABLE
 )
+assets.load_assets()
 clock = pygame.time.Clock()
 running = True
 dt = 0
@@ -330,15 +332,20 @@ while running:
             food.draw_food(screen, item, grid_offset_x, grid_offset_y, cell_size)
 
         # Draw Snake
-        for p in players:
-            for snake_case in p["snake"]:
-                if (
-                    p["head"][0] >= 0 
-                    and p["head"][0] < grid_size 
-                    and p["head"][1] >= 0 
-                    and p["head"][1] < grid_size
-                ):
-                    snake.draw_snake(screen, snake_case, grid_offset_x, grid_offset_y, cell_size)
+        for p in players:                
+            if (
+                p["head"][0] >= 0 
+                and p["head"][0] < grid_size 
+                and p["head"][1] >= 0 
+                and p["head"][1] < grid_size
+            ):
+                snake.draw_snake(
+                    screen, 
+                    p,
+                    grid_offset_x, 
+                    grid_offset_y, 
+                    cell_size
+                )
                     
         # Draw Obstacles    
         if obstacle_mode:
@@ -373,8 +380,7 @@ while running:
         
         # Draw Snake
         for p in players:
-            for snake_case in p["snake"]:
-                snake.draw_snake(screen, snake_case, grid_offset_x, grid_offset_y, cell_size)
+            snake.draw_snake(screen, p, grid_offset_x, grid_offset_y, cell_size)
         
         # Draw Obstacles
         if obstacle_mode:

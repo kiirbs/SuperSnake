@@ -1,6 +1,7 @@
 import pygame
 import random
 
+import assets
 import settings
 
 def draw_grid(screen, grid_size, cell_size, grid_offset_x, grid_offset_y):
@@ -41,13 +42,15 @@ def draw_obstacles(screen, obstacles_pos, grid_offset_x, grid_offset_y, cell_siz
     obstacles_row = obstacles_pos[0]
     obstacles_col = obstacles_pos[1]
     
-    pygame.draw.rect(
-            screen,
-            settings.OBSTACLES_COLOR,
-            (
-                grid_offset_x + obstacles_row * cell_size + 1,
-                grid_offset_y + obstacles_col * cell_size + 1,
-                cell_size - 2,
-                cell_size - 2
-            )
+    sprite = assets.get_sprites(
+        assets.OBSTACLE,
+        cell_size
+    )
+    
+    screen.blit(
+        sprite,
+        (
+            grid_offset_x + obstacles_row * cell_size,
+            grid_offset_y + obstacles_col * cell_size
         )
+    )
