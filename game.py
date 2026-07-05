@@ -9,6 +9,7 @@ import menu
 import grid
 import audio
 import save
+import assets
 
 def cell_size_check(selected_grid_size, width, height):
     
@@ -116,7 +117,7 @@ def new_game(grid_size, max_food, food_interval, difficulty, mode, bot_mode):
     # Food
     food_pos = []
     for _ in range(max_food):
-        food_pos.append(food.generate_food(grid_size, food_pos, obstacles_pos, players))
+        food_pos.append(food.generate_food(grid_size, food_pos, powerup_pos, obstacles_pos, players))
         
     food_interval = (max_food - 1) * difficulty["food_interval"]
     
@@ -392,8 +393,10 @@ def draw_score(screen, player, width, height):
     
     x = int(40 * dh) if player["name"] == "player_1" else width - int(40 * dh) - score_width
     
-    base_font_size = max(3, int(settings.DEFAULT_SCORE_FONT * dh))
-    score_font = pygame.font.Font(None, base_font_size)
+    # base_font_size = max(3, int(settings.DEFAULT_SCORE_FONT * dh))
+    # score_font = pygame.font.Font(None, base_font_size)
+    
+    score_font = assets.create_font(settings.DEFAULT_SCORE_FONT, dh)
     
     score_rect = create_rect(x, int((30 * dh) + score_height), score_width, score_height)
     best_score_rect = create_rect(x, int(20 * dh), score_width, score_height)
@@ -451,7 +454,7 @@ def draw_score(screen, player, width, height):
     screen.blit(speed_text_surface, speed_text_rect)
     screen.blit(snake_len_text_surface, snake_len_text_rect)
     
-def end_game(screen, highscores, players, width, height, selected_grid_size, text):
+def end_game(screen, highscores, players, width, height, selected_grid_size, text, game_state):
     # Set screen color
     screen.fill(settings.BACKGROUND_COLOR)
         
@@ -466,7 +469,7 @@ def end_game(screen, highscores, players, width, height, selected_grid_size, tex
         game.draw_score(screen, p, width, height)
         
     # Buttons
-    buttons = menu.draw_game_over(screen, width, height)
+    buttons = menu.draw_game_over(screen, width, height, settings.MENUS[game_state])
         
     # Grid Size and Cell Size Check
     grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)

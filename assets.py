@@ -29,11 +29,17 @@ FOOD = None
 
 OBSTACLE = None
 
+FLOOR = None
+
+BUTTON = None
+BUTTON_HOVER = None
+BUTTON_SELECT = None
+
 POWERUPS = None
 
 def load_assets():
     
-    global HEAD_RIGHT, HEAD_UP, HEAD_LEFT, HEAD_DOWN, BODY_RIGHT, BODY_UP, BODY_LEFT, BODY_DOWN, BODY_L_DOWN, BODY_L_RIGHT, BODY_L_UP, BODY_L_LEFT, BODY_R_UP, BODY_R_LEFT, BODY_R_DOWN, BODY_R_RIGHT, TAIL_RIGHT, TAIL_UP, TAIL_LEFT, TAIL_DOWN, FOOD, OBSTACLE, POWERUPS
+    global HEAD_RIGHT, HEAD_UP, HEAD_LEFT, HEAD_DOWN, BODY_RIGHT, BODY_UP, BODY_LEFT, BODY_DOWN, BODY_L_DOWN, BODY_L_RIGHT, BODY_L_UP, BODY_L_LEFT, BODY_R_UP, BODY_R_LEFT, BODY_R_DOWN, BODY_R_RIGHT, TAIL_RIGHT, TAIL_UP, TAIL_LEFT, TAIL_DOWN, FOOD, OBSTACLE, FLOOR, BUTTON, BUTTON_HOVER, BUTTON_SELECT, POWERUPS
     
     HEAD_RIGHT = pygame.image.load("assets/images/snake/head_1.png").convert_alpha()
     HEAD_UP = pygame.transform.rotate(
@@ -108,6 +114,12 @@ def load_assets():
     FOOD = pygame.image.load("assets/images/food/food.png").convert_alpha()
 
     OBSTACLE = pygame.image.load("assets/images/obstacle/obstacle.png").convert_alpha()
+    
+    FLOOR = pygame.image.load("assets/images/floor/floor.png").convert_alpha()
+    
+    BUTTON = pygame.image.load("assets/images/ui/button_1.png").convert_alpha()
+    BUTTON_HOVER = pygame.image.load("assets/images/ui/button_1_hover.png").convert_alpha()
+    BUTTON_SELECT = pygame.image.load("assets/images/ui/button_1_selected.png").convert_alpha()
 
     POWERUPS = {
         "POISON": pygame.image.load("assets/images/powerup/poison_powerup.png").convert_alpha(),
@@ -120,13 +132,35 @@ def load_assets():
 
 _scaled_cache = {}
 
-def get_sprites(sprite, cell_size):
-    key = (id(sprite), cell_size)
+def get_sprite(sprite, width, height=None):
+    
+    if height is None:
+        height = width
+        
+    key = (id(sprite), width, height)
     
     if key not in _scaled_cache:
         _scaled_cache[key] = pygame.transform.scale(
             sprite,
-            (cell_size, cell_size)
+            (width, height)
         )
         
     return _scaled_cache[key]
+
+def create_font(size, scale):
+    
+    size = max(6, int(size * scale))
+    
+    return pygame.font.Font(
+        "assets/fonts/FantasyRPGtext.ttf",
+        size
+    )
+
+def create_hover_font(size, scale):
+    
+    size = max(6, int(size * scale * 1.1))
+    
+    return pygame.font.Font(
+        "assets/fonts/FantasyRPGtext.ttf",
+        size
+    )

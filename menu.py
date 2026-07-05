@@ -2,6 +2,7 @@ import pygame
 from collections import deque
 
 import game
+import assets
 import settings
 
 def get_scale(width, height):
@@ -19,7 +20,33 @@ def create_font(font_size, dh):
     
     return item_font, hover_font
 
-def draw_menu(screen, width, height, states):
+def draw_button(screen, rect, text, sprite, font, text_color):
+    
+    lines = text.split("\n")
+    
+    line_height = font.get_height()
+    total_height = len(lines) * line_height
+    
+    button_sprite = assets.get_sprite(
+            sprite,
+            rect.width,
+            rect.height
+        )
+    screen.blit(button_sprite, rect)
+    
+    start_y = rect.centery - total_height // 2
+    
+    for i, line in enumerate(lines):
+        surface = font.render(line, True, text_color)
+        text_rect = surface.get_rect(
+            center=(
+                rect.centerx,
+                start_y + i * line_height + line_height // 2
+            )
+        )
+        screen.blit(surface, text_rect)
+
+def draw_menu(screen, width, height, states, marge):
     
     mouse_pos = pygame.mouse.get_pos()
     
@@ -33,7 +60,9 @@ def draw_menu(screen, width, height, states):
     button_height = max(settings.DEFAULT_BUTTON_MIN_HEIGHT, int(settings.DEFAULT_BUTTON_HEIGHT * dh))
     button_offset = max(settings.DEFAULT_BUTTON_MIN_MARGE, int(settings.DEFAULT_BUTTON_MARGE * dh))
     
-    menu_font, hover_font = create_font(settings.DEFAULT_MENU_FONT, dh)
+    # menu_font, hover_font = create_font(settings.DEFAULT_MENU_FONT, dh)
+    menu_font = assets.create_font(settings.DEFAULT_MENU_FONT, dh)
+    hover_font = assets.create_hover_font(settings.DEFAULT_MENU_FONT, dh)
     
     menu_width = button_width
     menu_height = (
@@ -43,41 +72,33 @@ def draw_menu(screen, width, height, states):
     offset = button_height + button_offset
     
     x = (width - menu_width) // 2
-    y = settings.DEFAULT_TITLE_MARGE + (((height - settings.DEFAULT_TITLE_MARGE) - menu_height) // 2)
+    y = marge + (((height - marge) - menu_height) // 2)
         
     for button_text in states:
         
         button_rect = game.create_rect(x, y, button_width, button_height)
                 
         if button_rect.collidepoint(mouse_pos):
-            color = settings.MENU_HOVER_COLOR
+            sprite = assets.BUTTON_HOVER
             text_color = settings.TEXT_HOVER_COLOR
             font = hover_font
                  
             button_rect = game.create_rect(x - 5, y - 5, button_width + 10, button_height + 10)
             
         else:
-            color = settings.MENU_COLOR
+            sprite = assets.BUTTON
             text_color = settings.TEXT_COLOR
             font = menu_font
         
         buttons.append((button_text, button_rect))
         
-        pygame.draw.rect(
-            screen,
-            color,
-            button_rect,
-        )
-        
-        text_surface, text_rect = game.create_text(font, button_text, text_color, button_rect)
-        
-        screen.blit(text_surface, text_rect)
+        draw_button(screen, button_rect, button_text, sprite, font, text_color)
         
         y += offset
         
     return buttons
 
-def draw_game_over(screen, width, height):
+def draw_game_over(screen, width, height, options):
     
     mouse_pos = pygame.mouse.get_pos()
     
@@ -89,40 +110,34 @@ def draw_game_over(screen, width, height):
     button_height = max(settings.DEFAULT_BUTTON3_MIN_HEIGHT, int(settings.DEFAULT_BUTTON3_HEIGHT * dh))
     button_offset = max(settings.DEFAULT_BUTTON3_MIN_MARGE, int(settings.DEFAULT_BUTTON3_MARGE * dh))
     
-    menu_font, hover_font = create_font(settings.DEFAULT_GAME_OVER_FONT, dh)
+    # menu_font, hover_font = create_font(settings.DEFAULT_GAME_OVER_FONT, dh)
+    menu_font = assets.create_font(settings.DEFAULT_GAME_OVER_FONT, dh)
+    hover_font = assets.create_hover_font(settings.DEFAULT_GAME_OVER_FONT, dh)
     
-    button_pos = int(width / (len(settings.GAME_OVER) + 1))
+    button_pos = int(width / (len(options) + 1))
     
     x = int(button_pos - (button_width / 2))
     y = height - (button_offset + button_height)
     
-    for button_text in settings.GAME_OVER:
+    for button_text in options:
         
         button_rect = game.create_rect(x, y, button_width, button_height)
         
         if button_rect.collidepoint(mouse_pos):
-            color = settings.MENU_HOVER_COLOR
+            sprite = assets.BUTTON_HOVER
             text_color = settings.TEXT_HOVER_COLOR
             font = hover_font
                         
             button_rect = game.create_rect(x - 5, y - 5, button_width + 10, button_height + 10)
             
         else:
-            color = settings.MENU_COLOR
+            sprite = assets.BUTTON
             text_color = settings.TEXT_COLOR
             font = menu_font
             
         buttons.append((button_text, button_rect))
         
-        pygame.draw.rect(
-            screen,
-            color,
-            button_rect,
-        )
-        
-        text_surface, text_rect = game.create_text(font, button_text, text_color, button_rect)
-        
-        screen.blit(text_surface, text_rect)
+        draw_button(screen, button_rect, button_text, sprite, font, text_color)
         
         x += button_pos
         
@@ -137,8 +152,10 @@ def print_game_result(screen, game_result, width, height):
     
     y = button_offset + button_height
     
-    base_font_size = max(3, int(settings.DEFAULT_TITLE_FONT * dh))
-    font = pygame.font.Font(None, base_font_size)
+    # base_font_size = max(3, int(settings.DEFAULT_TITLE_FONT * dh))
+    # font = pygame.font.Font(None, base_font_size)
+    
+    font = assets.create_font(settings.DEFAULT_TITLE_FONT, dh)
 
     text_surface = font.render(
         game_result,
@@ -152,7 +169,7 @@ def print_game_result(screen, game_result, width, height):
     
     screen.blit(text_surface, text_rect)
     
-def second_menu_setup(states, width, height):
+def second_menu_setup(states, width, height, marge):
     
     mouse_pos = pygame.mouse.get_pos()
     
@@ -166,23 +183,45 @@ def second_menu_setup(states, width, height):
     menu_height = max(settings.DEFAULT_BUTTON_MIN_HEIGHT, int(settings.DEFAULT_BUTTON_HEIGHT * dh))
     menu_offset = max(settings.DEFAULT_BUTTON_MIN_MARGE, int(settings.DEFAULT_BUTTON_MARGE * dh))
     
-    menu_font, hover_font = create_font(settings.DEFAULT_RETURN_FONT, dh)
+    # menu_font, hover_font = create_font(settings.DEFAULT_RETURN_FONT, dh)
+    menu_font = assets.create_font(settings.DEFAULT_RETURN_FONT, dh)
+    hover_font = assets.create_hover_font(settings.DEFAULT_RETURN_FONT, dh)
     
     menu_height = (
         (states_len * menu_height)
         + ((states_len - 1) * menu_offset)
     )
     
-    menu_y = height - (((height - settings.DEFAULT_TITLE_MARGE) - menu_height) // 2) - button_height
+    menu_y = height - (((height - marge) - menu_height) // 2) - button_height
     
     return mouse_pos, dw, dh, button_width, button_height, menu_font, hover_font, menu_y
+
+def get_button_statue(mouse_pos, rect, font, hover_font, extra_x, y, button_width, button_height, mode, text):
     
-def draw_second_menu(screen, buttons, obstacle_mode, powerup_mode, width, height, states):
+    if rect.collidepoint(mouse_pos):
+        sprite = assets.BUTTON_HOVER
+        text_color = settings.TEXT_HOVER_COLOR
+        selected_font = hover_font
+                        
+        rect = game.create_rect(extra_x - 5, y - 5, button_width + 10, button_height + 10)
+        
+    else:
+        text_color = settings.TEXT_HOVER_COLOR if mode else settings.TEXT_COLOR
+        sprite = assets.BUTTON_SELECT if mode else assets.BUTTON 
+        selected_font = font
+        
+    state = "ON" if mode else "OFF"
+    text = f"{text}\n{state}"
+        
+    return rect, sprite, text_color, selected_font, text
+    
+def draw_second_menu(screen, buttons, obstacle_mode, powerup_mode, width, height, states, marge):
     
     mouse_pos, dw, dh, button_width, button_height, menu_font, hover_font, y = second_menu_setup(
         states,
         width,
-        height
+        height,
+        marge
     )
     
     return_x = width - ((60 * dw) + button_width)
@@ -193,86 +232,48 @@ def draw_second_menu(screen, buttons, obstacle_mode, powerup_mode, width, height
     powerup_rect = game.create_rect(extra_x, y - int(20*dh) - button_height, button_width, button_height)
     
     if return_rect.collidepoint(mouse_pos):
-        return_color = settings.MENU_HOVER_COLOR
+        return_sprite = assets.BUTTON_HOVER
         return_text_color = settings.TEXT_HOVER_COLOR
         return_font = hover_font
                         
         return_rect = game.create_rect(return_x - 5, y - 5, button_width + 10, button_height + 10)
         
     else:
-        return_color = settings.MENU_COLOR
+        return_sprite = assets.BUTTON
         return_text_color = settings.TEXT_COLOR
         return_font = menu_font
         
-    if obstacle_rect.collidepoint(mouse_pos):
-        obstacle_color = settings.MENU_HOVER_COLOR
-        obstacle_text_color = settings.TEXT_HOVER_COLOR
-        obstacle_font = hover_font
-                        
-        obstacle_rect = game.create_rect(extra_x - 5, y - 5, button_width + 10, button_height + 10)
-        
-    else:
-        if obstacle_mode:
-            obstacle_text_color = settings.TEXT_HOVER_COLOR
-        else:
-            obstacle_text_color = settings.TEXT_COLOR
-            
-        obstacle_color = settings.MENU_COLOR
-        obstacle_font = menu_font
-        
-    if obstacle_mode:
-        obstacle_text = "OBSTACLES : ON"
-    else:
-        obstacle_text = "OBSTACLES : OFF"
-        
-    if powerup_rect.collidepoint(mouse_pos):
-        powerup_color = settings.MENU_HOVER_COLOR
-        powerup_text_color = settings.TEXT_HOVER_COLOR
-        powerup_font = hover_font
-                        
-        powerup_rect = game.create_rect(
-            extra_x - 5, 
-            y - int(10*dh) - button_height - 5, 
-            button_width + 10, 
-            button_height + 10)
-        
-    else:
-        if powerup_mode:
-            powerup_text_color = settings.TEXT_HOVER_COLOR
-        else:
-            powerup_text_color = settings.TEXT_COLOR
-            
-        powerup_color = settings.MENU_COLOR
-        powerup_font = menu_font
-        
-    if powerup_mode:
-        powerup_text = "POWER UP : ON"
-    else:
-        powerup_text = "POWER UP : OFF"
-        
-    pygame.draw.rect(
-        screen,
-        return_color,
-        return_rect,
+    obstacle_rect, obstacle_sprite, obstacle_text_color, obstacle_font, obstacle_text = get_button_statue(
+        mouse_pos, 
+        obstacle_rect, 
+        menu_font, 
+        hover_font, 
+        extra_x, 
+        y, 
+        button_width, 
+        button_height, 
+        obstacle_mode, 
+        "OBSTACLES: "
     )
-    pygame.draw.rect(
-        screen,
-        obstacle_color,
-        obstacle_rect,
-    )
-    pygame.draw.rect(
-        screen,
-        powerup_color,
-        powerup_rect,
+        
+    powerup_rect, powerup_sprite, powerup_text_color, powerup_font, powerup_text = get_button_statue(
+        mouse_pos, 
+        powerup_rect, 
+        menu_font, 
+        hover_font, 
+        extra_x, 
+        y - int(10*dh) - button_height, 
+        button_width, 
+        button_height, 
+        powerup_mode, 
+        "POWER-UP: "
     )
     
-    return_text_surface, return_text_rect = game.create_text(return_font, "RETURN", return_text_color, return_rect)
-    obstacle_text_surface, obstacle_text_rect = game.create_text(obstacle_font, obstacle_text, obstacle_text_color, obstacle_rect)
-    powerup_text_surface, powerup_text_rect = game.create_text(powerup_font, powerup_text, powerup_text_color, powerup_rect)
-        
-    screen.blit(return_text_surface, return_text_rect)
-    screen.blit(obstacle_text_surface, obstacle_text_rect)
-    screen.blit(powerup_text_surface, powerup_text_rect)
+    
+    
+    draw_button(screen, return_rect, "RETURN", return_sprite, return_font, return_text_color)
+    draw_button(screen, obstacle_rect, obstacle_text, obstacle_sprite, obstacle_font, obstacle_text_color)
+    draw_button(screen, powerup_rect, powerup_text, powerup_sprite, powerup_font, powerup_text_color)
     
     buttons.append(("RETURN", return_rect))
     buttons.append(("OBSTACLE", obstacle_rect))
@@ -280,50 +281,50 @@ def draw_second_menu(screen, buttons, obstacle_mode, powerup_mode, width, height
     
     return buttons
 
-def draw_bot_menu(screen, buttons, bot_mode, width, height, states):
+# def draw_bot_menu(screen, buttons, bot_mode, width, height, states):
     
-    mouse_pos, dw, dh, button_width, button_height, menu_font, hover_font, y = second_menu_setup(
-        states,
-        width,
-        height
-    )
+#     mouse_pos, dw, dh, button_width, button_height, menu_font, hover_font, y = second_menu_setup(
+#         states,
+#         width,
+#         height
+#     )
     
-    x = 60 * dw
-    y = y - int(40*dh) - (2 * button_height)
+#     x = 60 * dw
+#     y = y - int(40*dh) - (2 * button_height)
     
-    bot_rect = game.create_rect(x, y, button_width, button_height)
+#     bot_rect = game.create_rect(x, y, button_width, button_height)
         
-    if bot_rect.collidepoint(mouse_pos):
-        bot_color = settings.MENU_HOVER_COLOR
-        bot_text_color = settings.TEXT_HOVER_COLOR
-        bot_font = hover_font
+#     if bot_rect.collidepoint(mouse_pos):
+#         bot_color = settings.MENU_HOVER_COLOR
+#         bot_text_color = settings.TEXT_HOVER_COLOR
+#         bot_font = hover_font
                         
-        bot_rect = game.create_rect(x - 5, y - 5, button_width + 10, button_height + 10)
+#         bot_rect = game.create_rect(x - 5, y - 5, button_width + 10, button_height + 10)
         
-    else:
-        if bot_mode:
-            bot_text_color = settings.TEXT_HOVER_COLOR
-        else:
-            bot_text_color = settings.TEXT_COLOR
+#     else:
+#         if bot_mode:
+#             bot_text_color = settings.TEXT_HOVER_COLOR
+#         else:
+#             bot_text_color = settings.TEXT_COLOR
             
-        bot_color = settings.MENU_COLOR
-        bot_font = menu_font
+#         bot_color = settings.MENU_COLOR
+#         bot_font = menu_font
         
-    if bot_mode:
-        bot_text = "BOT : ON"
-    else:
-        bot_text = "BOT : OFF"
+#     if bot_mode:
+#         bot_text = "BOT : ON"
+#     else:
+#         bot_text = "BOT : OFF"
         
-    pygame.draw.rect(
-        screen,
-        bot_color,
-        bot_rect,
-    )
+#     pygame.draw.rect(
+#         screen,
+#         bot_color,
+#         bot_rect,
+#     )
     
-    bot_text_surface, bot_text_rect = game.create_text(bot_font, bot_text, bot_text_color, bot_rect)
+#     bot_text_surface, bot_text_rect = game.create_text(bot_font, bot_text, bot_text_color, bot_rect)
         
-    screen.blit(bot_text_surface, bot_text_rect)
+#     screen.blit(bot_text_surface, bot_text_rect)
     
-    buttons.append(("BOT", bot_rect))
+#     buttons.append(("BOT", bot_rect))
     
-    return buttons
+#     return buttons

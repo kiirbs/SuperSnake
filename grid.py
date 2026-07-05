@@ -11,11 +11,17 @@ def draw_grid(screen, grid_size, cell_size, grid_offset_x, grid_offset_y):
             x = grid_offset_x + col * cell_size
             y = grid_offset_y + row * cell_size
             
-            pygame.draw.rect(
-                screen, 
-                settings.GRID_COLOR, 
-                (x, y, cell_size, cell_size), 
-                1
+            sprite = assets.get_sprite(
+                assets.FLOOR,
+                cell_size
+            )
+    
+            screen.blit(
+                sprite,
+                (
+                    x,
+                    y
+                )
             )
             
 def generate_obstacles(grid_size, food_pos, obstacles_pos, players): # Creer des lignes d'obstacle ? Peut etre avec random ?
@@ -42,7 +48,7 @@ def draw_obstacles(screen, obstacles_pos, grid_offset_x, grid_offset_y, cell_siz
     obstacles_row = obstacles_pos[0]
     obstacles_col = obstacles_pos[1]
     
-    sprite = assets.get_sprites(
+    sprite = assets.get_sprite(
         assets.OBSTACLE,
         cell_size
     )

@@ -26,10 +26,12 @@ dt = 0
 
 # Setup
 game_state = "MENU"
+menu_state = "PRINCIPAL"
 mode = "SOLO"
 obstacle_mode = False
 powerup_mode = False
 bot_mode = False
+board_mode = "1-BOARD"
 best_score = 0
 difficulty = settings.NORMAL
 difficulty_name = difficulty["name"]
@@ -39,13 +41,14 @@ powerup_interval = difficulty["power_up_interval"]
 highscores = save.load_highscores()
 players = []
 text = None
+marge = settings.DEFAULT_TITLE_MARGE
 
 width = screen.get_width()
 height = screen.get_height()
 
 # Menu
 buttons = deque([])
-buttons = menu.draw_menu(screen, width, height, settings.MENU)
+buttons = menu.draw_menu(screen, width, height, settings.MENUS[menu_state], marge)
 
 # Grid
 selected_grid_size = difficulty["grid_size"]
@@ -90,16 +93,28 @@ while running:
                 if button.collidepoint(event.pos):
                     audio.CLICK_SOUND.play()
                     if value == "SOLO":
-                        mode = "SOLO"
-                        game_state = "MENU2"
+                        mode = value
+                        menu_state = "DIFFICULTY"
                         
-                    elif value == "ONE-BOARD MULTI":
-                        mode = "MULTI1"
-                        game_state = "MENU2"
+                    elif value == "VERSUS":
+                        mode = value
+                        menu_state = "SELECT_PLAYER"
                         
-                    elif value == "TWO-BOARD MULTI":
-                        mode = "MULTI2"
-                        game_state = "MENU2"
+                    elif value == "P1 VS P2":
+                        bot_mode = False
+                        menu_state = "SELECT_BOARD"
+                        
+                    elif value == "P1 VS IA":
+                        bot_mode = True
+                        menu_state = "SELECT_BOARD"
+                        
+                    elif value == "1-BOARD":
+                        board_mode = value
+                        menu_state = "DIFFICULTY"
+                        
+                    elif value == "2-BOARD":
+                        board_mode = value
+                        menu_state = "DIFFICULTY"
                         
                     elif value == "EASY":
                         selected_grid_size, max_food, food_interval, game_state, difficulty = game.game_setup(settings.EASY)
@@ -122,7 +137,7 @@ while running:
                         if powerup_mode:
                             max_powerup, powerup_interval = game.powerup_game_setup(settings.HARD)
                         
-                    elif value == "ULTRA HARD":
+                    elif value == "INSANE":
                         selected_grid_size, max_food, food_interval, game_state, difficulty = game.game_setup(settings.ULTRA_HARD)
                         if obstacle_mode:
                             max_obstacles = game.obstacle_game_setup(settings.ULTRA_HARD)
@@ -136,18 +151,27 @@ while running:
                         if powerup_mode:
                             max_powerup, powerup_interval = game.powerup_game_setup(difficulty)
                         
-                    elif value == "RETURN TO MENU" or value == "RETURN":
+                    elif value == "MENU":
                         game_state = "MENU"
+                        menu_state = "PRINCIPAL"
                         best_score = 0
+                        
+                    elif value == "RETURN":
+                        if mode == "SOLO":
+                            menu_state = "PRINCIPAL"
+                        else:
+                            if menu_state == "SELECT_PLAYER":
+                                menu_state = "PRINCIPAL"
+                            elif menu_state == "SELECT_BOARD":
+                                menu_state = "SELECT_PLAYER"
+                            elif menu_state == "DIFFICULTY":
+                                menu_state = "SELECT_BOARD"
                         
                     elif value == "OBSTACLE":
                         obstacle_mode = False if obstacle_mode else True
                         
                     elif value == "POWERUP":
                         powerup_mode = False if powerup_mode else True
-                        
-                    elif value == "BOT":
-                        bot_mode = False if bot_mode else True
                     
                     # New Game
                     grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
@@ -184,25 +208,41 @@ while running:
         screen.fill(settings.BACKGROUND_COLOR)
         
         # Draw Difficulty Menu
-        buttons = menu.draw_menu(screen, width, height, settings.MENU)
+        marge = (
+            settings.DEFAULT_TITLE_MARGE 
+            if menu_state != "DIFFICULTY" 
+            else settings.DEFAULT_DIFFICULTY_MARGE
+        )
+        buttons = menu.draw_menu(screen, width, height, settings.MENUS[menu_state], marge)
+        if menu_state != "PRINCIPAL":
+            buttons = menu.draw_second_menu(
+                screen, 
+                buttons, 
+                obstacle_mode, 
+                powerup_mode, 
+                width, 
+                height, 
+                settings.MENUS[menu_state],
+                marge
+            )
         
         # Grid Size and Cell Size Check
         grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
     
     # Difficulty Menu
-    elif game_state == "MENU2":
+    # elif game_state == "MENU2":
         
-        # Set screen color
-        screen.fill(settings.BACKGROUND_COLOR)
+    #     # Set screen color
+    #     screen.fill(settings.BACKGROUND_COLOR)
         
-        # Draw Difficulty Menu   
-        buttons = menu.draw_menu(screen, width, height, settings.DIFFICULT)
-        buttons = menu.draw_second_menu(screen, buttons, obstacle_mode, powerup_mode, width, height, settings.DIFFICULT)
-        if mode != "SOLO":
-            buttons = menu.draw_bot_menu(screen, buttons, bot_mode, width, height, settings.DIFFICULT)
+    #     # Draw Difficulty Menu   
+    #     buttons = menu.draw_menu(screen, width, height, settings.DIFFICULT)
+    #     buttons = menu.draw_second_menu(screen, buttons, obstacle_mode, powerup_mode, width, height, settings.DIFFICULT)
+    #     if mode != "SOLO":
+    #         buttons = menu.draw_bot_menu(screen, buttons, bot_mode, width, height, settings.DIFFICULT)
         
-        # Grid Size and Cell Size Check
-        grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
+    #     # Grid Size and Cell Size Check
+    #     grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
     
     # In Game
     elif game_state == "GAME":
@@ -248,6 +288,7 @@ while running:
                 game_state,
                 obstacles_pos,
                 food_pos,
+                powerup_pos,
                 max_food,
                 food_interval,
                 mode
@@ -412,7 +453,8 @@ while running:
             width, 
             height, 
             selected_grid_size, 
-            text
+            text,
+            game_state
         )
         
     # Print

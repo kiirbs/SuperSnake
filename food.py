@@ -1,4 +1,3 @@
-import pygame
 import random
 
 import game
@@ -6,18 +5,21 @@ import audio
 import assets
 import settings
 
-def generate_food(grid_size, food_pos, obstacles_pos, players):
+def generate_food(grid_size, food_pos, powerup_pos, obstacles_pos, players):
     
     possible_food_pos = [
         [i, j]
-        for i in range(grid_size) 
+        for i in range(grid_size)
         for j in range(grid_size)
-        if not any(
-            [i, j] in p["snake"]
-            for p in players
+        if (
+            not any([i, j] in p["snake"] for p in players)
+            and [i, j] not in food_pos
+            and [i, j] not in obstacles_pos
+            and not any(
+                powerup is not None and powerup["pos"] == [i, j]
+                for powerup in powerup_pos
+            )
         )
-        and [i, j] not in food_pos
-        and [i, j] not in obstacles_pos
     ]
     
     if not possible_food_pos:
@@ -30,7 +32,7 @@ def draw_food(screen, food_pos, grid_offset_x, grid_offset_y, cell_size):
     food_row = food_pos[0]
     food_col = food_pos[1]
     
-    sprite = assets.get_sprites(
+    sprite = assets.get_sprite(
         assets.FOOD,
         cell_size
     )
@@ -73,7 +75,7 @@ def draw_powerup(screen, pos, type, grid_offset_x, grid_offset_y, cell_size):
     row = pos[0]
     col = pos[1]
     
-    sprite = assets.get_sprites(
+    sprite = assets.get_sprite(
         assets.POWERUPS[type],
         cell_size
     )
@@ -86,7 +88,19 @@ def draw_powerup(screen, pos, type, grid_offset_x, grid_offset_y, cell_size):
         )
     )
     
-def eat_food_check(player, players, grid_size, difficulty, game_state, obstacles_pos, food_pos, max_food, food_interval, mode):
+def eat_food_check(
+    player, 
+    players, 
+    grid_size, 
+    difficulty, 
+    game_state, 
+    obstacles_pos, 
+    food_pos, 
+    powerup_pos, 
+    max_food, 
+    food_interval, 
+    mode
+):
     
     text = None
     
@@ -103,6 +117,7 @@ def eat_food_check(player, players, grid_size, difficulty, game_state, obstacles
                 food_pos[i] = generate_food(
                     grid_size, 
                     food_pos,
+                    powerup_pos,
                     obstacles_pos,
                     players
                 )
@@ -195,7 +210,21 @@ APPLY_EFFECT = {
     "SCORE_DOWN": apply_score_down,
 }
 
-def eat_powerup_check(player, players, grid_size, difficulty, game_state, obstacles_pos, food_pos, max_food, powerup_pos, max_powerup, powerup_interval, mode, text):
+def eat_powerup_check(
+    player, 
+    players, 
+    grid_size, 
+    difficulty, 
+    game_state, 
+    obstacles_pos, 
+    food_pos, 
+    max_food, 
+    powerup_pos, 
+    max_powerup, 
+    powerup_interval, 
+    mode, 
+    text
+):
     
     for powerup in powerup_pos:
                 

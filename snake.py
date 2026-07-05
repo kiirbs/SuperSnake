@@ -1,9 +1,7 @@
 import random
-import pygame
 from collections import deque
 
 import assets
-import settings
 
 BODY_ASSETS = {
     ((0, 1), (0, 1)): "BODY_UP",
@@ -72,7 +70,7 @@ def draw_snake(screen, player, grid_offset_x, grid_offset_y, cell_size):
         else: 
             asset = get_body_asset(prev_case, case, next_case)
             
-        sprite = assets.get_sprites(asset, cell_size)
+        sprite = assets.get_sprite(asset, cell_size)
         screen.blit(sprite, ((
             grid_offset_x + case[0] * cell_size, 
             grid_offset_y + case[1] * cell_size
