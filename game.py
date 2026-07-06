@@ -393,9 +393,6 @@ def draw_score(screen, player, width, height):
     
     x = int(40 * dh) if player["name"] == "player_1" else width - int(40 * dh) - score_width
     
-    # base_font_size = max(3, int(settings.DEFAULT_SCORE_FONT * dh))
-    # score_font = pygame.font.Font(None, base_font_size)
-    
     score_font = assets.create_font(settings.DEFAULT_SCORE_FONT, dh)
     
     score_rect = create_rect(x, int((30 * dh) + score_height), score_width, score_height)

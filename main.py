@@ -201,7 +201,7 @@ while running:
                             obstacles_pos
                         )
 
-    # Principal Menu
+    # Menus
     if game_state == "MENU":
         
         # Set screen color
@@ -228,21 +228,6 @@ while running:
         
         # Grid Size and Cell Size Check
         grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
-    
-    # Difficulty Menu
-    # elif game_state == "MENU2":
-        
-    #     # Set screen color
-    #     screen.fill(settings.BACKGROUND_COLOR)
-        
-    #     # Draw Difficulty Menu   
-    #     buttons = menu.draw_menu(screen, width, height, settings.DIFFICULT)
-    #     buttons = menu.draw_second_menu(screen, buttons, obstacle_mode, powerup_mode, width, height, settings.DIFFICULT)
-    #     if mode != "SOLO":
-    #         buttons = menu.draw_bot_menu(screen, buttons, bot_mode, width, height, settings.DIFFICULT)
-        
-    #     # Grid Size and Cell Size Check
-    #     grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
     
     # In Game
     elif game_state == "GAME":

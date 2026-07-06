@@ -25,21 +25,24 @@ TAIL_UP = None
 TAIL_LEFT = None
 TAIL_DOWN = None
 
-FOOD = None
-
-OBSTACLE = None
-
 FLOOR = None
+BACKGROUND = None
 
 BUTTON = None
 BUTTON_HOVER = None
 BUTTON_SELECT = None
 
+SCREEN = None
+LARGE_SCREEN = None
+BANNER_SCREEN = None
+
+FOOD = None
+OBSTACLE = None
 POWERUPS = None
 
 def load_assets():
     
-    global HEAD_RIGHT, HEAD_UP, HEAD_LEFT, HEAD_DOWN, BODY_RIGHT, BODY_UP, BODY_LEFT, BODY_DOWN, BODY_L_DOWN, BODY_L_RIGHT, BODY_L_UP, BODY_L_LEFT, BODY_R_UP, BODY_R_LEFT, BODY_R_DOWN, BODY_R_RIGHT, TAIL_RIGHT, TAIL_UP, TAIL_LEFT, TAIL_DOWN, FOOD, OBSTACLE, FLOOR, BUTTON, BUTTON_HOVER, BUTTON_SELECT, POWERUPS
+    global HEAD_RIGHT, HEAD_UP, HEAD_LEFT, HEAD_DOWN, BODY_RIGHT, BODY_UP, BODY_LEFT, BODY_DOWN, BODY_L_DOWN, BODY_L_RIGHT, BODY_L_UP, BODY_L_LEFT, BODY_R_UP, BODY_R_LEFT, BODY_R_DOWN, BODY_R_RIGHT, TAIL_RIGHT, TAIL_UP, TAIL_LEFT, TAIL_DOWN, FOOD, OBSTACLE, FLOOR, BUTTON, BUTTON_HOVER, BUTTON_SELECT, POWERUPS, BACKGROUND, SCREEN, LARGE_SCREEN, BANNER_SCREEN
     
     HEAD_RIGHT = pygame.image.load("assets/images/snake/head_1.png").convert_alpha()
     HEAD_UP = pygame.transform.rotate(
@@ -110,17 +113,20 @@ def load_assets():
         TAIL_LEFT,
         90
     )
-
-    FOOD = pygame.image.load("assets/images/food/food.png").convert_alpha()
-
-    OBSTACLE = pygame.image.load("assets/images/obstacle/obstacle.png").convert_alpha()
     
-    FLOOR = pygame.image.load("assets/images/floor/floor.png").convert_alpha()
+    FLOOR = pygame.image.load("assets/images/ambiance/floor.png").convert_alpha()
+    BACKGROUND = pygame.image.load("assets/images/ambiance/wall.png").convert_alpha()
     
     BUTTON = pygame.image.load("assets/images/ui/button_1.png").convert_alpha()
     BUTTON_HOVER = pygame.image.load("assets/images/ui/button_1_hover.png").convert_alpha()
     BUTTON_SELECT = pygame.image.load("assets/images/ui/button_1_selected.png").convert_alpha()
+    
+    SCREEN = pygame.image.load("assets/images/ui/screen_1.png").convert_alpha()
+    LARGE_SCREEN = pygame.image.load("assets/images/ui/screen_2.png").convert_alpha()
+    BANNER_SCREEN = pygame.image.load("assets/images/ui/banner.png").convert_alpha()
 
+    FOOD = pygame.image.load("assets/images/food/food.png").convert_alpha()
+    OBSTACLE = pygame.image.load("assets/images/obstacle/obstacle.png").convert_alpha()
     POWERUPS = {
         "POISON": pygame.image.load("assets/images/powerup/poison_powerup.png").convert_alpha(),
         "SCORE_DOWN": pygame.image.load("assets/images/powerup/score_down_powerup.png").convert_alpha(),
