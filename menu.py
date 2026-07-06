@@ -86,7 +86,7 @@ def draw_menu(screen, width, height, states, marge):
             
         else:
             sprite = assets.BUTTON
-            text_color = settings.TEXT_COLOR
+            text_color = settings.BUTTON_COLOR
             font = menu_font
         
         buttons.append((button_text, button_rect))
@@ -130,7 +130,7 @@ def draw_game_over(screen, width, height, options):
             
         else:
             sprite = assets.BUTTON
-            text_color = settings.TEXT_COLOR
+            text_color = settings.BUTTON_COLOR
             font = menu_font
             
         buttons.append((button_text, button_rect))
@@ -143,26 +143,22 @@ def draw_game_over(screen, width, height, options):
 
 def print_game_result(screen, game_result, width, height):
     
-    dh = height / settings.DEFAULT_HEIGHT
+    dw, dh = get_scale(width, height)
     
-    button_height = max(12, int(settings.DEFAULT_BUTTON3_HEIGHT * dh))
-    button_offset = max(5, int(settings.DEFAULT_BUTTON3_MARGE * dh))
+    mid_w = width // 2
     
-    y = button_offset + button_height
+    score_width = max(settings.DEFAULT_RESULT_MIN_WIDTH, int(settings.DEFAULT_RESULT_WIDTH * dw))
+    score_height = max(settings.DEFAULT_RESULT_MIN_HEIGHT, int(settings.DEFAULT_RESULT_HEIGHT * dh))
     
+    x = mid_w - (score_width // 2)
+    y = int(50 * dh)
+    
+    sprite = assets.BANNER_SCREEN
+    
+    rect = game.create_rect(x, y, score_width, score_height)
     font = assets.create_font(settings.DEFAULT_TITLE_FONT, dh)
-
-    text_surface = font.render(
-        game_result,
-        True,
-        settings.TEXT_COLOR
-    )
     
-    text_rect = text_surface.get_rect(
-        center=(width // 2, (height - y) // 2)
-    )
-    
-    screen.blit(text_surface, text_rect)
+    draw_button(screen, rect, game_result, sprite, font, settings.TITLE_COLOR)
     
 def second_menu_setup(states, width, height, marge):
     
@@ -200,7 +196,7 @@ def get_button_statue(mouse_pos, rect, font, hover_font, extra_x, y, button_widt
         rect = game.create_rect(extra_x - 5, y - 5, button_width + 10, button_height + 10)
         
     else:
-        text_color = settings.TEXT_HOVER_COLOR if mode else settings.TEXT_COLOR
+        text_color = settings.TEXT_HOVER_COLOR if mode else settings.BUTTON_COLOR
         sprite = assets.BUTTON_SELECT if mode else assets.BUTTON 
         selected_font = font
         
@@ -234,7 +230,7 @@ def draw_second_menu(screen, buttons, obstacle_mode, powerup_mode, width, height
         
     else:
         return_sprite = assets.BUTTON
-        return_text_color = settings.TEXT_COLOR
+        return_text_color = settings.BUTTON_COLOR
         return_font = menu_font
         
     obstacle_rect, obstacle_sprite, obstacle_text_color, obstacle_font, obstacle_text = get_button_statue(

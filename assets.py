@@ -115,7 +115,7 @@ def load_assets():
     )
     
     FLOOR = pygame.image.load("assets/images/ambiance/floor.png").convert_alpha()
-    BACKGROUND = pygame.image.load("assets/images/ambiance/wall.png").convert_alpha()
+    BACKGROUND = pygame.image.load("assets/images/ambiance/wall.png").convert()
     
     BUTTON = pygame.image.load("assets/images/ui/button_1.png").convert_alpha()
     BUTTON_HOVER = pygame.image.load("assets/images/ui/button_1_hover.png").convert_alpha()

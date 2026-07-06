@@ -360,15 +360,12 @@ def powerup_game_setup(difficulty):
     return max_powerup, powerup_interval
 
 def create_rect(x, y, width, height):
-    
-    rect = pygame.Rect(
-            x, 
-            y,
-            width, 
-            height
-        )
-    
-    return rect
+    return pygame.Rect(
+        x, 
+        y,
+        width, 
+        height
+    )
 
 def create_text(font, text, color, rect):
     
@@ -391,75 +388,36 @@ def draw_score(screen, player, width, height):
     score_width = max(settings.DEFAULT_SCORE_MIN_WIDTH, int(settings.DEFAULT_SCORE_WIDTH * dw))
     score_height = max(settings.DEFAULT_SCORE_MIN_HEIGHT, int(settings.DEFAULT_SCORE_HEIGHT * dh))
     
-    x = int(40 * dh) if player["name"] == "player_1" else width - int(40 * dh) - score_width
+    x = int(20 * dh) if player["name"] == "player_1" else width - int(20 * dh) - score_width
     
     score_font = assets.create_font(settings.DEFAULT_SCORE_FONT, dh)
+    
+    sprite = assets.SCREEN
     
     score_rect = create_rect(x, int((30 * dh) + score_height), score_width, score_height)
     best_score_rect = create_rect(x, int(20 * dh), score_width, score_height)
     speed_rect = create_rect(x, int((40 * dh) + score_height * 2), score_width, score_height)
     snake_len_rect = create_rect(x, int((50 * dh) + score_height * 3), score_width, score_height)
-        
-    pygame.draw.rect(
-        screen,
-        settings.SCORE_COLOR,
-        score_rect,
-    )
-    pygame.draw.rect(
-        screen,
-        settings.SCORE_COLOR,
-        best_score_rect,
-    )
-    pygame.draw.rect(
-        screen,
-        settings.SCORE_COLOR,
-        speed_rect,
-    )
-    pygame.draw.rect(
-        screen,
-        settings.SCORE_COLOR,
-        snake_len_rect,
-    )
     
-    score_text_surface, score_text_rect = create_text(
-        score_font, 
-        f"SCORE : {player['score']}", 
-        settings.TEXT_COLOR, 
-        score_rect
-    )
-    best_score_text_surface, best_score_text_rect = create_text(
-        score_font, 
-        f"BEST : {player['best_score']}", 
-        settings.TEXT_COLOR, 
-        best_score_rect
-    )
-    speed_text_surface, speed_text_rect = create_text(
-        score_font, 
-        f"SPEED : {player['speed']} C/S", 
-        settings.TEXT_COLOR, 
-        speed_rect
-    )
-    snake_len_text_surface, snake_len_text_rect = create_text(
-        score_font, 
-        f"LENGHT : {player['snake_len']}", 
-        settings.TEXT_COLOR, 
-        snake_len_rect
-    )
-        
-    screen.blit(score_text_surface, score_text_rect)
-    screen.blit(best_score_text_surface, best_score_text_rect)
-    screen.blit(speed_text_surface, speed_text_rect)
-    screen.blit(snake_len_text_surface, snake_len_text_rect)
+    menu.draw_button(screen, score_rect, f"SCORE:\n{player['score']}", sprite, score_font, settings.SCORE_COLOR)
+    menu.draw_button(screen, best_score_rect, f"BEST:\n{player['best_score']}", sprite, score_font, settings.SCORE_COLOR)
+    menu.draw_button(screen, speed_rect, f"SPEED:\n{player['speed']} C/s", sprite, score_font, settings.SCORE_COLOR)
+    menu.draw_button(screen, snake_len_rect, f"LENGHT:\n{player['snake_len']}", sprite, score_font, settings.SCORE_COLOR)
     
 def end_game(screen, highscores, players, width, height, selected_grid_size, text, game_state):
     # Set screen color
-    screen.fill(settings.BACKGROUND_COLOR)
+    # screen.fill(settings.BACKGROUND_COLOR)
+    screen.blit(
+        assets.get_sprite(
+            assets.BACKGROUND,
+            width,
+            height
+        ),
+        (0, 0)
+    )
         
     # Save Highscore
     save.save_highscores(highscores)
-        
-    # Print GAME OVER
-    menu.print_game_result(screen, text, width, height)
         
     # Draw Score
     for p in players:
@@ -467,6 +425,9 @@ def end_game(screen, highscores, players, width, height, selected_grid_size, tex
         
     # Buttons
     buttons = menu.draw_game_over(screen, width, height, settings.MENUS[game_state])
+    
+    # Print GAME OVER
+    menu.print_game_result(screen, text, width, height)
         
     # Grid Size and Cell Size Check
     grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)

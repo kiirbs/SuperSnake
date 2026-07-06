@@ -205,7 +205,15 @@ while running:
     if game_state == "MENU":
         
         # Set screen color
-        screen.fill(settings.BACKGROUND_COLOR)
+        # screen.fill(settings.BACKGROUND_COLOR)
+        screen.blit(
+            assets.get_sprite(
+                assets.BACKGROUND,
+                width,
+                height
+            ),
+            (0, 0)
+        )
         
         # Draw Difficulty Menu
         marge = (

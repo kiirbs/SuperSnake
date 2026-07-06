@@ -1,6 +1,6 @@
 # SuperSnake
 
-First python project, remaster snake.
+First python project, full handmade snake.
 
 ## MVP
 
@@ -26,7 +26,7 @@ First python project, remaster snake.
 - [X] Vitesse progressive
 - [X] Obstacles
 - [X] Power-ups
-- [ ] Effets visuels
+- [X] Effets visuels
 - [X] Sons
 - [ ] Plus d'effets visuels
 - [ ] Plus de sons
