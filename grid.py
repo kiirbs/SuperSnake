@@ -11,18 +11,44 @@ def draw_grid(screen, grid_size, cell_size, grid_offset_x, grid_offset_y):
             x = grid_offset_x + col * cell_size
             y = grid_offset_y + row * cell_size
             
-            sprite = assets.get_sprite(
-                assets.FLOOR,
-                cell_size
-            )
+            assets.print_asset(screen, assets.FLOOR, cell_size, x, y)
+            
+def draw_set(screen, grid_size, cell_size, grid_offset_x, grid_offset_y):
     
-            screen.blit(
-                sprite,
-                (
-                    x,
-                    y
-                )
-            )
+    grid_offset_x -= cell_size
+    grid_offset_y -= cell_size
+    
+    set_size = grid_size + 2
+        
+    for row in range(set_size):
+        for col in range(set_size):
+            
+            x = grid_offset_x + col * cell_size
+            y = grid_offset_y + row * cell_size
+            
+            if row == 0 and col == 0:
+                assets.print_asset(screen, assets.SET_UP_LEFT, cell_size, x, y)
+                
+            elif row == 0 and col != 0 and col != set_size - 1:
+                assets.print_asset(screen, assets.SET_UP, cell_size, x, y)
+            
+            elif row == 0 and col == set_size - 1:
+                assets.print_asset(screen, assets.SET_UP_RIGHT, cell_size, x, y)
+                
+            elif col == 0 and row != 0 and row != set_size - 1:
+                assets.print_asset(screen, assets.SET_LEFT, cell_size, x, y)
+                
+            elif col == set_size - 1 and row != 0 and row != set_size - 1:
+                assets.print_asset(screen, assets.SET_RIGHT, cell_size, x, y)
+                
+            elif row == set_size - 1 and col == 0:
+                assets.print_asset(screen, assets.SET_DOWN_LEFT, cell_size, x, y)
+                
+            elif row == set_size - 1 and col != 0 and col != set_size - 1:
+                assets.print_asset(screen, assets.SET_DOWN, cell_size, x, y)
+                
+            elif row == set_size - 1 and col == set_size - 1:
+                assets.print_asset(screen, assets.SET_DOWN_RIGHT, cell_size, x, y)
             
 def generate_obstacles(grid_size, food_pos, obstacles_pos, players): # Creer des lignes d'obstacle ? Peut etre avec random ?
     
@@ -48,15 +74,7 @@ def draw_obstacles(screen, obstacles_pos, grid_offset_x, grid_offset_y, cell_siz
     obstacles_row = obstacles_pos[0]
     obstacles_col = obstacles_pos[1]
     
-    sprite = assets.get_sprite(
-        assets.OBSTACLE,
-        cell_size
-    )
+    x = grid_offset_x + obstacles_row * cell_size
+    y = grid_offset_y + obstacles_col * cell_size
     
-    screen.blit(
-        sprite,
-        (
-            grid_offset_x + obstacles_row * cell_size,
-            grid_offset_y + obstacles_col * cell_size
-        )
-    )
+    assets.print_asset(screen, assets.OBSTACLE, cell_size, x, y)

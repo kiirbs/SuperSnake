@@ -241,7 +241,15 @@ while running:
     elif game_state == "GAME":
         
         # Set screen color
-        screen.fill(settings.BACKGROUND_COLOR)
+        # screen.fill(settings.BACKGROUND_COLOR)
+        screen.blit(
+            assets.get_sprite(
+                assets.BACKGROUND,
+                width,
+                height
+            ),
+            (0, 0)
+        )
     
         # Offsets
         grid_offset_x, grid_offset_y = game.offsetts_check(width, height, grid_size, cell_size)
@@ -354,6 +362,7 @@ while running:
 
         # Draw Grid
         grid.draw_grid(screen, grid_size, cell_size, grid_offset_x, grid_offset_y)
+        grid.draw_set(screen, grid_size, cell_size, grid_offset_x, grid_offset_y)
         
         # Draw Score
         for p in players:
@@ -400,13 +409,22 @@ while running:
     elif game_state == "PAUSE":
         
         # Set screen color
-        screen.fill(settings.BACKGROUND_COLOR)
+        # screen.fill(settings.BACKGROUND_COLOR)
+        screen.blit(
+            assets.get_sprite(
+                assets.BACKGROUND,
+                width,
+                height
+            ),
+            (0, 0)
+        )
         
         # Offsets
         grid_offset_x, grid_offset_y = game.offsetts_check(width, height, grid_size, cell_size)
         
         # Draw Grid
         grid.draw_grid(screen, grid_size, cell_size, grid_offset_x, grid_offset_y)
+        grid.draw_set(screen, grid_size, cell_size, grid_offset_x, grid_offset_y)
         
         # Draw Food
         for item in food_pos:

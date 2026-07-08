@@ -27,6 +27,14 @@ TAIL_DOWN = None
 
 FLOOR = None
 BACKGROUND = None
+SET_UP = None
+SET_UP_RIGHT =  None
+SET_UP_LEFT =  None
+SET_DOWN = None
+SET_DOWN_RIGHT = None
+SET_DOWN_LEFT = None
+SET_RIGHT = None
+SET_LEFT = None
 
 BUTTON = None
 BUTTON_HOVER = None
@@ -42,7 +50,7 @@ POWERUPS = None
 
 def load_assets():
     
-    global HEAD_RIGHT, HEAD_UP, HEAD_LEFT, HEAD_DOWN, BODY_RIGHT, BODY_UP, BODY_LEFT, BODY_DOWN, BODY_L_DOWN, BODY_L_RIGHT, BODY_L_UP, BODY_L_LEFT, BODY_R_UP, BODY_R_LEFT, BODY_R_DOWN, BODY_R_RIGHT, TAIL_RIGHT, TAIL_UP, TAIL_LEFT, TAIL_DOWN, FOOD, OBSTACLE, FLOOR, BUTTON, BUTTON_HOVER, BUTTON_SELECT, POWERUPS, BACKGROUND, SCREEN, LARGE_SCREEN, BANNER_SCREEN
+    global HEAD_RIGHT, HEAD_UP, HEAD_LEFT, HEAD_DOWN, BODY_RIGHT, BODY_UP, BODY_LEFT, BODY_DOWN, BODY_L_DOWN, BODY_L_RIGHT, BODY_L_UP, BODY_L_LEFT, BODY_R_UP, BODY_R_LEFT, BODY_R_DOWN, BODY_R_RIGHT, TAIL_RIGHT, TAIL_UP, TAIL_LEFT, TAIL_DOWN, FOOD, OBSTACLE, FLOOR, BUTTON, BUTTON_HOVER, BUTTON_SELECT, POWERUPS, BACKGROUND, SCREEN, LARGE_SCREEN, BANNER_SCREEN, SET_DOWN, SET_DOWN_LEFT, SET_DOWN_RIGHT, SET_UP, SET_UP_LEFT, SET_UP_RIGHT, SET_LEFT, SET_RIGHT
     
     HEAD_RIGHT = pygame.image.load("assets/images/snake/head_1.png").convert_alpha()
     HEAD_UP = pygame.transform.rotate(
@@ -116,6 +124,14 @@ def load_assets():
     
     FLOOR = pygame.image.load("assets/images/ambiance/floor.png").convert_alpha()
     BACKGROUND = pygame.image.load("assets/images/ambiance/wall.png").convert()
+    SET_UP = pygame.image.load("assets/images/ambiance/set_up.png").convert_alpha()
+    SET_UP_RIGHT =  pygame.image.load("assets/images/ambiance/set_up_right.png").convert_alpha()
+    SET_UP_LEFT =  pygame.image.load("assets/images/ambiance/set_up_left.png").convert_alpha()
+    SET_DOWN = pygame.image.load("assets/images/ambiance/set_down.png").convert_alpha()
+    SET_DOWN_RIGHT = pygame.image.load("assets/images/ambiance/set_down_right.png").convert_alpha()
+    SET_DOWN_LEFT = pygame.image.load("assets/images/ambiance/set_down_left.png").convert_alpha()
+    SET_RIGHT = pygame.image.load("assets/images/ambiance/set_right.png").convert_alpha()
+    SET_LEFT = pygame.image.load("assets/images/ambiance/set_left.png").convert_alpha()
     
     BUTTON = pygame.image.load("assets/images/ui/button_1.png").convert_alpha()
     BUTTON_HOVER = pygame.image.load("assets/images/ui/button_1_hover.png").convert_alpha()
@@ -170,3 +186,10 @@ def create_hover_font(size, scale):
         "assets/fonts/FantasyRPGtext.ttf",
         size
     )
+    
+def print_asset(screen, image, cell_size, x, y):
+    
+    sprite = get_sprite(image, cell_size)
+    
+    if sprite is not None:
+        screen.blit(sprite, (x, y))

@@ -21,7 +21,7 @@ def cell_size_check(selected_grid_size, width, height):
 def offsetts_check(width, height, grid_size, cell_size):
     
     grid_offset_x = (width - grid_size * cell_size) / 2
-    grid_offset_y = 100 + (((height - 150) - grid_size * cell_size) / 2)
+    grid_offset_y = 75 + (((height - 150) - grid_size * cell_size) / 2)
     
     return grid_offset_x, grid_offset_y
 
