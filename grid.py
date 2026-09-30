@@ -1,8 +1,6 @@
-import pygame
 import random
 
 import assets
-import settings
 
 def draw_grid(screen, grid_size, cell_size, grid_offset_x, grid_offset_y):
     for row in range(grid_size):

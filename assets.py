@@ -1,5 +1,9 @@
 import pygame
 
+PLAYER_1 = None
+
+PLAYER_2 = None
+
 HEAD_RIGHT = None
 HEAD_UP = None
 HEAD_LEFT = None
@@ -48,80 +52,127 @@ FOOD = None
 OBSTACLE = None
 POWERUPS = None
 
+PLAYER_SKINS = {
+    "CLASSIC": {
+        "HEAD": "assets/images/snake/head_1.png",
+        "BODY": "assets/images/snake/body_1.png",
+        "BODY_RIGHT": "assets/images/snake/body_1_right.png",
+        "BODY_LEFT": "assets/images/snake/body_1_left.png",
+        "TAIL": "assets/images/snake/tail_1.png"
+    },
+    "GEAR": {
+        "HEAD": "assets/images/snake/head_2.png",
+        "BODY_1": "assets/images/snake/body_2-1.png",
+        "BODY_2": "assets/images/snake/body_2-2.png",
+        "BODY_TURN": "assets/images/snake/body_2_turn.png",
+        "TAIL": "assets/images/snake/tail_2.png"
+    },
+    "SKIN_3": {
+        "HEAD": "assets/images/snake/head_3.png",
+        "BODY": "assets/images/snake/body_3.png",
+        "BODY_TURN": "assets/images/snake/body_3_turn.png",
+        "TAIL": "assets/images/snake/tail_3.png"
+    },
+    "SKIN_4": {
+        "HEAD": "assets/images/snake/head_4.png",
+        "BODY": "assets/images/snake/body_4.png",
+        "BODY_TURN": "assets/images/snake/body_4_turn.png",
+        "TAIL": "assets/images/snake/tail_4.png"
+    }
+}
+
+BOT_SKINS = {
+    "CLASSIC": {
+        "HEAD": "assets/images/snake/head_bot_1.png",
+        "BODY": "assets/images/snake/body_bot_1.png",
+        "BODY_TURN": "assets/images/snake/body_bot_turn_1.png",
+        "TAIL": "assets/images/snake/tail_bot_1.png"
+    },
+    "UPGRADE": {
+        "HEAD": "assets/images/snake/head_bot_2.png",
+        "BODY": "assets/images/snake/body_bot_2.png",
+        "BODY_TURN": "assets/images/snake/body_bot_turn_2.png",
+        "TAIL": "assets/images/snake/tail_bot_2.png"
+    }
+}
+
+# Les chemins restent dans les catalogues ; les surfaces sont chargees ici.
+PLAYER_SKIN_ASSETS = {}
+BOT_SKIN_ASSETS = {}
+
+
+def load_skin(paths):
+    """Charge un skin et prepare les orientations sans lisser les pixels."""
+    sprites = {
+        part: pygame.image.load(path).convert_alpha()
+        for part, path in paths.items()
+    }
+
+    left_turn = sprites.get("BODY_LEFT", sprites.get("BODY_TURN"))
+    right_turn = sprites.get("BODY_RIGHT", sprites.get("BODY_TURN"))
+
+    # Chaque sprite droit est dessine vers la droite dans les fichiers sources.
+    for part in ("HEAD", "BODY", "BODY_1", "BODY_2", "TAIL"):
+        if part in sprites:
+            for direction, angle in (("RIGHT", 0), ("UP", 90),
+                                     ("LEFT", 180), ("DOWN", 270)):
+                sprites[f"{part}_{direction}"] = pygame.transform.rotate(
+                    sprites[part], angle
+                )
+
+    # CLASSIC possede deux virages distincts ; les autres partagent un virage.
+    for prefix, sprite, directions in (
+        ("BODY_L", left_turn, ("DOWN", "RIGHT", "UP", "LEFT")),
+        ("BODY_R", right_turn, ("UP", "LEFT", "DOWN", "RIGHT")),
+    ):
+        for index, direction in enumerate(directions):
+            sprites[f"{prefix}_{direction}"] = pygame.transform.rotate(
+                sprite, index * 90
+            )
+
+    # GEAR garde ses deux variantes pour pouvoir alterner les segments.
+    if "BODY" not in sprites:
+        sprites["BODY"] = sprites["BODY_1"]
+        for direction in ("RIGHT", "UP", "LEFT", "DOWN"):
+            sprites[f"BODY_{direction}"] = sprites[f"BODY_1_{direction}"]
+
+    return sprites
+
 def load_assets():
-    
+
     global HEAD_RIGHT, HEAD_UP, HEAD_LEFT, HEAD_DOWN, BODY_RIGHT, BODY_UP, BODY_LEFT, BODY_DOWN, BODY_L_DOWN, BODY_L_RIGHT, BODY_L_UP, BODY_L_LEFT, BODY_R_UP, BODY_R_LEFT, BODY_R_DOWN, BODY_R_RIGHT, TAIL_RIGHT, TAIL_UP, TAIL_LEFT, TAIL_DOWN, FOOD, OBSTACLE, FLOOR, BUTTON, BUTTON_HOVER, BUTTON_SELECT, POWERUPS, BACKGROUND, SCREEN, LARGE_SCREEN, BANNER_SCREEN, SET_DOWN, SET_DOWN_LEFT, SET_DOWN_RIGHT, SET_UP, SET_UP_LEFT, SET_UP_RIGHT, SET_LEFT, SET_RIGHT
-    
-    HEAD_RIGHT = pygame.image.load("assets/images/snake/head_1.png").convert_alpha()
-    HEAD_UP = pygame.transform.rotate(
-        HEAD_RIGHT,
-        90
-    )
-    HEAD_LEFT = pygame.transform.rotate(
-        HEAD_UP,
-        90
-    )
-    HEAD_DOWN = pygame.transform.rotate(
-        HEAD_LEFT,
-        90
-    )
 
-    BODY_RIGHT = pygame.image.load("assets/images/snake/body_1.png").convert_alpha()
-    BODY_UP = pygame.transform.rotate(
-        BODY_RIGHT,
-        90
-    )
-    BODY_LEFT = pygame.transform.rotate(
-        BODY_UP,
-        90
-    )
-    BODY_DOWN = pygame.transform.rotate(
-        BODY_LEFT,
-        90
-    )
+    _scaled_cache.clear()
+    PLAYER_SKIN_ASSETS.clear()
+    BOT_SKIN_ASSETS.clear()
+    for name, paths in PLAYER_SKINS.items():
+        PLAYER_SKIN_ASSETS[name] = load_skin(paths)
+    for name, paths in BOT_SKINS.items():
+        BOT_SKIN_ASSETS[name] = load_skin(paths)
 
-    BODY_L_DOWN = pygame.image.load("assets/images/snake/body_1_left.png").convert_alpha()
-    BODY_L_RIGHT = pygame.transform.rotate(
-        BODY_L_DOWN,
-        90
-    )
-    BODY_L_UP = pygame.transform.rotate(
-        BODY_L_RIGHT,
-        90
-    )
-    BODY_L_LEFT = pygame.transform.rotate(
-        BODY_L_UP,
-        90
-    )
+    # Compatibilite avec snake.py : le jeu utilise encore le skin CLASSIC.
+    classic = PLAYER_SKIN_ASSETS["CLASSIC"]
+    HEAD_RIGHT = classic["HEAD_RIGHT"]
+    HEAD_UP = classic["HEAD_UP"]
+    HEAD_LEFT = classic["HEAD_LEFT"]
+    HEAD_DOWN = classic["HEAD_DOWN"]
+    BODY_RIGHT = classic["BODY_RIGHT"]
+    BODY_UP = classic["BODY_UP"]
+    BODY_LEFT = classic["BODY_LEFT"]
+    BODY_DOWN = classic["BODY_DOWN"]
+    BODY_L_DOWN = classic["BODY_L_DOWN"]
+    BODY_L_RIGHT = classic["BODY_L_RIGHT"]
+    BODY_L_UP = classic["BODY_L_UP"]
+    BODY_L_LEFT = classic["BODY_L_LEFT"]
+    BODY_R_UP = classic["BODY_R_UP"]
+    BODY_R_LEFT = classic["BODY_R_LEFT"]
+    BODY_R_DOWN = classic["BODY_R_DOWN"]
+    BODY_R_RIGHT = classic["BODY_R_RIGHT"]
+    TAIL_RIGHT = classic["TAIL_RIGHT"]
+    TAIL_UP = classic["TAIL_UP"]
+    TAIL_LEFT = classic["TAIL_LEFT"]
+    TAIL_DOWN = classic["TAIL_DOWN"]
 
-    BODY_R_UP = pygame.image.load("assets/images/snake/body_1_right.png").convert_alpha()
-    BODY_R_LEFT = pygame.transform.rotate(
-        BODY_R_UP,
-        90
-    )
-    BODY_R_DOWN = pygame.transform.rotate(
-        BODY_R_LEFT,
-        90
-    )
-    BODY_R_RIGHT = pygame.transform.rotate(
-        BODY_R_DOWN,
-        90
-    )
-
-    TAIL_RIGHT = pygame.image.load("assets/images/snake/tail_1.png").convert_alpha()
-    TAIL_UP = pygame.transform.rotate(
-        TAIL_RIGHT,
-        90
-    )
-    TAIL_LEFT = pygame.transform.rotate(
-        TAIL_UP,
-        90
-    )
-    TAIL_DOWN = pygame.transform.rotate(
-        TAIL_LEFT,
-        90
-    )
-    
     FLOOR = pygame.image.load("assets/images/ambiance/floor.png").convert_alpha()
     BACKGROUND = pygame.image.load("assets/images/ambiance/wall.png").convert()
     SET_UP = pygame.image.load("assets/images/ambiance/set_up.png").convert_alpha()
