@@ -44,8 +44,21 @@ BUTTON = None
 BUTTON_HOVER = None
 BUTTON_SELECT = None
 
+BUTTON_2 = None
+BUTTON_2_HOVER = None
+BUTTON_2_SELECT = None
+
+BUTTON_ON = None
+BUTTON_OFF = None
+GAUGE_BAR = None
+GAUGE = None
+CURSOR = None
+SETTINGS_ICON = None
+SETTINGS_ICON_HOVER = None
+
 SCREEN = None
 LARGE_SCREEN = None
+SCREEN_3 = None
 BANNER_SCREEN = None
 
 FOOD = None
@@ -139,7 +152,11 @@ def load_skin(paths):
     return sprites
 
 def load_assets():
+    global SCREEN_3
+    global BUTTON_ON, BUTTON_OFF, GAUGE_BAR, GAUGE, CURSOR
+    global BUTTON_2, BUTTON_2_HOVER, BUTTON_2_SELECT
 
+    global SETTINGS_ICON, SETTINGS_ICON_HOVER
     global HEAD_RIGHT, HEAD_UP, HEAD_LEFT, HEAD_DOWN, BODY_RIGHT, BODY_UP, BODY_LEFT, BODY_DOWN, BODY_L_DOWN, BODY_L_RIGHT, BODY_L_UP, BODY_L_LEFT, BODY_R_UP, BODY_R_LEFT, BODY_R_DOWN, BODY_R_RIGHT, TAIL_RIGHT, TAIL_UP, TAIL_LEFT, TAIL_DOWN, FOOD, OBSTACLE, FLOOR, BUTTON, BUTTON_HOVER, BUTTON_SELECT, POWERUPS, BACKGROUND, SCREEN, LARGE_SCREEN, BANNER_SCREEN, SET_DOWN, SET_DOWN_LEFT, SET_DOWN_RIGHT, SET_UP, SET_UP_LEFT, SET_UP_RIGHT, SET_LEFT, SET_RIGHT
 
     _scaled_cache.clear()
@@ -187,9 +204,20 @@ def load_assets():
     BUTTON = pygame.image.load("assets/images/ui/button_1.png").convert_alpha()
     BUTTON_HOVER = pygame.image.load("assets/images/ui/button_1_hover.png").convert_alpha()
     BUTTON_SELECT = pygame.image.load("assets/images/ui/button_1_selected.png").convert_alpha()
+    BUTTON_2 = pygame.image.load("assets/images/ui/button_2.png").convert_alpha()
+    BUTTON_2_HOVER = pygame.image.load("assets/images/ui/button_2_hover.png").convert_alpha()
+    BUTTON_2_SELECT = pygame.image.load("assets/images/ui/button_2_selected.png").convert_alpha()
+    BUTTON_ON = pygame.image.load("assets/images/ui/button_on.png").convert_alpha()
+    BUTTON_OFF = pygame.image.load("assets/images/ui/button_off.png").convert_alpha()
+    GAUGE_BAR = pygame.image.load("assets/images/ui/gauge_bar.png").convert_alpha()
+    GAUGE = pygame.image.load("assets/images/ui/gauge.png").convert_alpha()
+    CURSOR = pygame.image.load("assets/images/ui/cursor.png").convert_alpha()
+    SETTINGS_ICON = pygame.image.load("assets/images/ui/settings.png").convert_alpha()
+    SETTINGS_ICON_HOVER = pygame.image.load("assets/images/ui/settings_hover.png").convert_alpha()
     
     SCREEN = pygame.image.load("assets/images/ui/screen_1.png").convert_alpha()
     LARGE_SCREEN = pygame.image.load("assets/images/ui/screen_2.png").convert_alpha()
+    SCREEN_3 = pygame.image.load("assets/images/ui/screen_3.png").convert_alpha()
     BANNER_SCREEN = pygame.image.load("assets/images/ui/banner.png").convert_alpha()
 
     FOOD = pygame.image.load("assets/images/food/food.png").convert_alpha()

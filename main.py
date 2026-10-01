@@ -27,6 +27,7 @@ dt = 0
 # Setup
 game_state = "MENU"
 menu_state = "PRINCIPAL"
+settings_menu = menu.SettingsMenu()
 mode = "SOLO"
 obstacle_mode = False
 powerup_mode = False
@@ -60,6 +61,13 @@ food_interval = difficulty["food_interval"]
 
 while running:
     for event in pygame.event.get():    # Check Event
+        if game_state == "MENU" and menu_state == "SETTINGS":
+            if settings_menu.handle_event(event, width, height):
+                menu_state = "PRINCIPAL"
+            # Les reglages visuels ne passent pas par la creation d'une partie.
+            if event.type in (pygame.MOUSEBUTTONDOWN, pygame.MOUSEBUTTONUP, pygame.MOUSEMOTION):
+                continue
+
         if event.type == pygame.QUIT:   # Quit
             running = False
             
@@ -88,11 +96,20 @@ while running:
             
             cell_size = min(width, height - 150) // grid_size
             
-        elif event.type == pygame.MOUSEBUTTONDOWN: # Clics
+        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1: # Clics
             for value, button in buttons:
                 if button.collidepoint(event.pos):
                     audio.CLICK_SOUND.play()
-                    if value == "SOLO":
+                    if value == "QUIT GAME":
+                        running = False
+                        # Quitter sans executer la preparation d'une nouvelle partie.
+                        break
+
+                    elif value == "SETTINGS":
+                        menu_state = "SETTINGS"
+                        break
+
+                    elif value == "SOLO":
                         mode = value
                         menu_state = "DIFFICULTY"
                         
@@ -221,18 +238,27 @@ while running:
             if menu_state != "DIFFICULTY" 
             else settings.DEFAULT_DIFFICULTY_MARGE
         )
-        buttons = menu.draw_menu(screen, width, height, settings.MENUS[menu_state], marge)
-        if menu_state != "PRINCIPAL":
-            buttons = menu.draw_second_menu(
-                screen, 
-                buttons, 
-                obstacle_mode, 
-                powerup_mode, 
-                width, 
-                height, 
-                settings.MENUS[menu_state],
-                marge
-            )
+        if menu_state == "SETTINGS":
+            settings_menu.draw(screen, width, height)
+            buttons = deque([])
+        else:
+            buttons = menu.draw_menu(screen, width, height, settings.MENUS[menu_state], marge)
+            if menu_state == "PRINCIPAL":
+                settings_rect = menu.draw_settings_button(screen, width, height, marge)
+                buttons.append(("SETTINGS", settings_rect))
+                quit_rect = menu.draw_quit_button(screen, width, height, marge)
+                buttons.append(("QUIT GAME", quit_rect))
+            else:
+                buttons = menu.draw_second_menu(
+                    screen,
+                    buttons,
+                    obstacle_mode,
+                    powerup_mode,
+                    width,
+                    height,
+                    settings.MENUS[menu_state],
+                    marge
+                )
         
         # Grid Size and Cell Size Check
         grid_size, cell_size = game.cell_size_check(selected_grid_size, width, height)
